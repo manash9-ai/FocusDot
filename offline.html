@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>FocusDot — Offline Mode</title>
+  <link rel="icon" type="image/svg+xml" href="./assets/icons/favicon.svg">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #05060A;
+      color: #FFFFFF;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+      -webkit-font-smoothing: antialiased;
+    }
+    .orb-glow {
+      width: 140px;
+      height: 140px;
+      border-radius: 9999px;
+      background: radial-gradient(circle, rgba(210, 255, 58, 0.4) 0%, rgba(210, 255, 58, 0.08) 55%, transparent 75%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+      position: relative;
+    }
+    .dot-core {
+      width: 32px;
+      height: 32px;
+      border-radius: 9999px;
+      background: #D2FF3A;
+      box-shadow: 0 0 25px rgba(210, 255, 58, 0.65);
+    }
+    h1 {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      margin-bottom: 8px;
+    }
+    p {
+      color: #8E92A0;
+      font-size: 14px;
+      line-height: 1.5;
+      max-width: 320px;
+      margin-bottom: 24px;
+    }
+    .retry-btn {
+      background-color: #D2FF3A;
+      color: #080A0F;
+      font-weight: 600;
+      font-size: 14px;
+      padding: 12px 28px;
+      border-radius: 9999px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(210, 255, 58, 0.3);
+      transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+    .retry-btn:active {
+      transform: scale(0.96);
+    }
+    .badge {
+      display: inline-block;
+      margin-top: 24px;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #555A68;
+      border: 1px solid #1E2330;
+      padding: 4px 12px;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body>
+  <div class="orb-glow">
+    <div class="dot-core"></div>
+  </div>
+  <h1>Deep Flow Offline</h1>
+  <p>You appear to be disconnected. Cached features and study sessions remain saved locally on your device.</p>
+  <button class="retry-btn" onclick="window.location.reload()">Reconnect to FocusDot</button>
+  <div class="badge">FocusDot Standalone PWA</div>
+</body>
+</html>
+

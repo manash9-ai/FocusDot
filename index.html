@@ -4,6 +4,17 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>FocusDot — Study & Deep Flow Timer</title>
+
+  <!-- Progressive Web App (PWA) Metadata -->
+  <link rel="manifest" href="./manifest.webmanifest">
+  <meta name="theme-color" content="#080A0F">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="FocusDot">
+  <link rel="apple-touch-icon" href="./assets/icons/apple-touch-icon.png">
+  <link rel="icon" type="image/svg+xml" href="./assets/icons/favicon.svg">
+  <link rel="icon" type="image/png" sizes="192x192" href="./assets/icons/icon-192.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
@@ -259,6 +270,10 @@
 
       <!-- iOS Dynamic Status & Mini-Player Capsule (Clean, Professional, No Frantic Beeps) -->
       <div class="flex items-center gap-2">
+        <button id="header-pwa-install-btn" type="button" class="hidden items-center gap-1.5 h-9 px-3 rounded-full bg-[#D2FF3A]/15 hover:bg-[#D2FF3A]/25 border border-[#D2FF3A]/30 text-[#D2FF3A] text-[11.5px] font-semibold transition-all shadow-sm active:scale-95" title="Install FocusDot App">
+          <span class="material-symbols-outlined text-[15px]">install_mobile</span>
+          <span>Install</span>
+        </button>
         <div id="dynamic-island-header" class="h-9 px-3.5 rounded-full bg-white/[0.06] hover:bg-white/[0.10] border border-white/10 backdrop-blur-2xl flex items-center gap-2.5 shadow-[0_2px_12px_rgba(0,0,0,0.6)] cursor-pointer transition-all select-none group">
           <span class="w-1.5 h-1.5 rounded-full bg-[#D2FF3A] shadow-[0_0_6px_rgba(210,255,58,0.7)]"></span>
           <span class="text-[11.5px] font-medium text-white/90 tracking-tight font-sans" id="header-focus-status">Deep Focus</span>
@@ -1579,6 +1594,54 @@
           </div>
         </div>
 
+        <!-- Progressive Web App (PWA) Standalone Installation -->
+        <div id="pwa-settings-section" class="space-y-1.5">
+          <span class="text-[10.5px] font-bold uppercase tracking-wider text-[#8E92A0] px-3">Progressive Web App</span>
+          <div class="rounded-2xl bg-[#11141D] border border-[#1E2330] overflow-hidden divide-y divide-[#181C26]">
+
+            <!-- Install FocusDot -->
+            <div class="p-3.5 flex items-center justify-between hover:bg-white/[0.02] transition">
+              <div class="flex items-center gap-3">
+                <div class="w-7 h-7 rounded-[8px] bg-gradient-to-tr from-[#D2FF3A] to-lime-600 flex items-center justify-center text-[#080A0F] shadow-sm font-bold">
+                  <span class="material-symbols-outlined text-[17px]">install_mobile</span>
+                </div>
+                <div class="flex flex-col">
+                  <span class="text-xs font-semibold text-white">Install FocusDot App</span>
+                  <span id="pwa-install-subtitle" class="text-[10px] text-[#8E92A0]">Standalone offline deep flow experience</span>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <button id="btn-pwa-install" type="button" class="px-3 py-1.5 rounded-xl bg-[#D2FF3A] hover:bg-[#b8e629] text-[#080A0F] text-[11px] font-bold shadow-[0_0_12px_rgba(210,255,58,0.25)] transition-all active:scale-95 flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[14px]">download</span>
+                  <span>Install</span>
+                </button>
+                <span id="badge-pwa-installed" class="hidden text-[10.5px] font-bold text-[#D2FF3A] bg-[#D2FF3A]/10 border border-[#D2FF3A]/20 px-2 py-0.5 rounded-lg flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[13px]">check_circle</span>
+                  <span>Installed</span>
+                </span>
+              </div>
+            </div>
+
+            <!-- Offline Cache Capability -->
+            <div class="p-3.5 flex items-center justify-between hover:bg-white/[0.02] transition">
+              <div class="flex items-center gap-3">
+                <div class="w-7 h-7 rounded-[8px] bg-gradient-to-tr from-cyan-600 to-blue-600 flex items-center justify-center text-white shadow-sm">
+                  <span class="material-symbols-outlined text-[16px]">offline_pin</span>
+                </div>
+                <div class="flex flex-col">
+                  <span class="text-xs font-semibold text-white">Offline Capability</span>
+                  <span class="text-[10px] text-[#8E92A0]">Service worker active for offline timer</span>
+                </div>
+              </div>
+              <span id="pwa-sw-status" class="text-[10.5px] font-bold text-[#D2FF3A] bg-[#D2FF3A]/10 px-2 py-0.5 rounded-lg border border-[#D2FF3A]/20 flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#D2FF3A] animate-pulse"></span>
+                <span>Active</span>
+              </span>
+            </div>
+
+          </div>
+        </div>
+
         <!-- Section 4: Architecture & Device Info -->
         <div class="space-y-1.5">
           <span class="text-[10.5px] font-bold uppercase tracking-wider text-[#8E92A0] px-3">System & Cross-Platform</span>
@@ -1760,6 +1823,52 @@
         <div class="pt-2">
           <button id="btn-legal-accept" type="button" class="w-full py-2.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.14] text-white font-semibold text-xs transition-colors">
             I Understand
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FocusDot iOS PWA Installation Sheet Modal -->
+    <div id="ios-install-modal" class="absolute inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-end justify-center transition-all">
+      <div id="ios-install-container" class="bg-[#0B101D] border-t border-[#1E293B] w-full max-w-md rounded-t-3xl p-6 space-y-4 shadow-2xl transform translate-y-full transition-transform duration-300 max-h-[85%] overflow-y-auto no-scrollbar">
+        <div class="flex items-center justify-between pb-2 border-b border-white/10">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-[#D2FF3A]"></span>
+            <h3 class="text-sm font-bold text-white tracking-tight">Install FocusDot on iOS</h3>
+          </div>
+          <button id="btn-close-ios-install" type="button" class="text-[#8E92A0] hover:text-white p-1 rounded-lg">
+            <span class="material-symbols-outlined text-[18px]">close</span>
+          </button>
+        </div>
+        <div class="text-xs text-[#94A3B8] space-y-3 leading-relaxed">
+          <p class="text-white font-medium">To install FocusDot on your iPhone or iPad for a full-screen, standalone deep flow experience:</p>
+          <div class="space-y-2.5 pt-1">
+            <div class="flex items-start gap-3 p-3 rounded-2xl bg-white/[0.03] border border-white/5">
+              <span class="w-6 h-6 rounded-full bg-[#D2FF3A]/15 text-[#D2FF3A] font-bold text-xs flex items-center justify-center shrink-0">1</span>
+              <div>
+                <p class="text-white font-semibold">Tap the Share button</p>
+                <p class="text-[11px] text-[#8E92A0]">At the bottom of Safari, tap the <span class="material-symbols-outlined text-[13px] align-middle text-[#D2FF3A]">ios_share</span> (square with arrow) button.</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-3 p-3 rounded-2xl bg-white/[0.03] border border-white/5">
+              <span class="w-6 h-6 rounded-full bg-[#D2FF3A]/15 text-[#D2FF3A] font-bold text-xs flex items-center justify-center shrink-0">2</span>
+              <div>
+                <p class="text-white font-semibold">Select "Add to Home Screen"</p>
+                <p class="text-[11px] text-[#8E92A0]">Scroll down the share options and tap <span class="material-symbols-outlined text-[13px] align-middle text-[#D2FF3A]">add_box</span> <strong>Add to Home Screen</strong>.</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-3 p-3 rounded-2xl bg-white/[0.03] border border-white/5">
+              <span class="w-6 h-6 rounded-full bg-[#D2FF3A]/15 text-[#D2FF3A] font-bold text-xs flex items-center justify-center shrink-0">3</span>
+              <div>
+                <p class="text-white font-semibold">Tap "Add" in the top right</p>
+                <p class="text-[11px] text-[#8E92A0]">FocusDot will appear as an app icon with instant launch and zero browser address bars!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="pt-2">
+          <button id="btn-ios-install-done" type="button" class="w-full py-2.5 rounded-xl bg-[#D2FF3A] hover:bg-[#b8e629] text-[#080A0F] font-bold text-xs transition-colors">
+            Got It
           </button>
         </div>
       </div>
@@ -4078,6 +4187,149 @@
 
     // Initialize Auth & Sign-in Experience
     initAuthExperience();
+
+    // =========================================================================
+    // PROGRESSIVE WEB APP (PWA) & SERVICE WORKER ENGINE
+    // =========================================================================
+    function initPWAExperience() {
+      // 1. Service Worker Registration
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker
+            .register('./sw.js')
+            .then((reg) => {
+              console.log('FocusDot ServiceWorker registered with scope:', reg.scope);
+              const swBadge = document.getElementById('pwa-sw-status');
+              if (swBadge) {
+                swBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-[#D2FF3A] animate-pulse"></span><span>Active</span>';
+              }
+            })
+            .catch((err) => {
+              console.warn('FocusDot ServiceWorker registration failed:', err);
+              const swBadge = document.getElementById('pwa-sw-status');
+              if (swBadge) {
+                swBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span><span>Limited</span>';
+              }
+            });
+        });
+      }
+
+      // 2. State & Elements
+      let deferredPrompt = null;
+      const btnHeaderInstall = document.getElementById('header-pwa-install-btn');
+      const btnSettingsInstall = document.getElementById('btn-pwa-install');
+      const badgeInstalled = document.getElementById('badge-pwa-installed');
+      const installSubtitle = document.getElementById('pwa-install-subtitle');
+      const iosModal = document.getElementById('ios-install-modal');
+      const iosContainer = document.getElementById('ios-install-container');
+      const btnCloseIos = document.getElementById('btn-close-ios-install');
+      const btnDoneIos = document.getElementById('btn-ios-install-done');
+
+      // Standalone detection
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+      const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+
+      function updateInstalledState() {
+        if (btnHeaderInstall) {
+          btnHeaderInstall.classList.add('hidden');
+          btnHeaderInstall.classList.remove('flex');
+        }
+        if (btnSettingsInstall) btnSettingsInstall.classList.add('hidden');
+        if (badgeInstalled) badgeInstalled.classList.remove('hidden');
+        if (installSubtitle) installSubtitle.textContent = 'Running in standalone deep flow mode';
+      }
+
+      if (isStandalone) {
+        updateInstalledState();
+        return;
+      }
+
+      // 3. Android / Chrome beforeinstallprompt support
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+
+        if (btnHeaderInstall) {
+          btnHeaderInstall.classList.remove('hidden');
+          btnHeaderInstall.classList.add('flex');
+        }
+        if (btnSettingsInstall) {
+          btnSettingsInstall.classList.remove('hidden');
+        }
+        if (installSubtitle) {
+          installSubtitle.textContent = 'Install as native app on home screen';
+        }
+      });
+
+      window.addEventListener('appinstalled', () => {
+        deferredPrompt = null;
+        updateInstalledState();
+        if (typeof window.showToast === 'function') {
+          window.showToast("FocusDot Installed! 🎉", "Launch from your home screen anytime", "check_circle", 4500);
+        }
+      });
+
+      // 4. iOS Safari Flow
+      function openIosModal() {
+        if (!iosModal || !iosContainer) return;
+        iosModal.classList.remove('hidden');
+        iosModal.classList.add('flex');
+        setTimeout(() => {
+          iosContainer.classList.remove('translate-y-full');
+        }, 10);
+      }
+
+      function closeIosModal() {
+        if (!iosModal || !iosContainer) return;
+        iosContainer.classList.add('translate-y-full');
+        setTimeout(() => {
+          iosModal.classList.add('hidden');
+          iosModal.classList.remove('flex');
+        }, 250);
+      }
+
+      if (btnCloseIos) btnCloseIos.addEventListener('click', closeIosModal);
+      if (btnDoneIos) btnDoneIos.addEventListener('click', closeIosModal);
+      if (iosModal) {
+        iosModal.addEventListener('click', (e) => {
+          if (e.target === iosModal) closeIosModal();
+        });
+      }
+
+      // 5. Trigger Install Actions
+      async function triggerInstall() {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          if (outcome === 'accepted') {
+            deferredPrompt = null;
+            updateInstalledState();
+          }
+        } else if (isIos) {
+          openIosModal();
+        } else {
+          if (typeof window.showToast === 'function') {
+            window.showToast("Install FocusDot", "Use browser menu (⋮) -> 'Install FocusDot'", "install_mobile", 4000);
+          }
+        }
+      }
+
+      if (btnHeaderInstall) btnHeaderInstall.addEventListener('click', triggerInstall);
+      if (btnSettingsInstall) btnSettingsInstall.addEventListener('click', triggerInstall);
+
+      if (isIos && !isStandalone) {
+        if (btnHeaderInstall) {
+          btnHeaderInstall.classList.remove('hidden');
+          btnHeaderInstall.classList.add('flex');
+        }
+        if (btnSettingsInstall) {
+          btnSettingsInstall.classList.remove('hidden');
+        }
+      }
+    }
+
+    // Initialize PWA features
+    initPWAExperience();
   </script>
 </body>
 </html>
