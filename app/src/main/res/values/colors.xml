@@ -1,0 +1,8 @@
+<resources>
+    <color name="neon_lime">#D2FF3A</color>
+    <color name="surface_dark">#080A0F</color>
+    <color name="surface_container">#11141D</color>
+    <color name="surface_container_high">#181C26</color>
+    <color name="text_white">#FFFFFF</color>
+    <color name="text_muted">#8E92A0</color>
+</resources>

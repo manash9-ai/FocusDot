@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">FocusDot</string>
+    <string name="deep_flow_mode">Deep Flow Mode</string>
+    <string name="start">Start</string>
+    <string name="pause">Pause</string>
+    <string name="resume">Resume</string>
+    <string name="reset">Reset</string>
+    <string name="streak_label">%1$d-DAY STREAK</string>
+</resources>

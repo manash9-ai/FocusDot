@@ -1,0 +1,54 @@
+# Environment and secrets
+.mcp.json
+.env
+.env.local
+.env.*.local
+*.secret
+*.pem
+*.key
+credentials.json
+secrets.json
+
+# Local backups and dumps
+checkpoint_backup/
+pre_restore_backup_*/
+*.bak
+*.orig
+
+# Agent and IDE local directories
+.agents/
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Diagnostic and local tools
+tools/*.py
+
+# Gradle / Android build outputs
+.gradle/
+build/
+app/build/
+*.apk
+*.aab
+local.properties
+.cxx/
+
+# Node / OS artifacts
+node_modules/
+.DS_Store
+Thumbs.db
+
+# Vercel
+.vercel/
+
+# Logs
+*.log
+
+# Design scratch files
+stitch_screens/
+stitch_design/
+
+# Environment files
+.env*
+!.env.example
