@@ -253,18 +253,6 @@
       The student productivity engine designed to eliminate distraction, enter deep flow states with real-time WebGL cosmic orbs, and master every study block.
     </p>
 
-    <!-- Video Mode Selector -->
-    <div style="display:inline-flex;align-items:center;background:#090D17;border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:4px;gap:4px;margin-bottom:24px">
-      <button id="btn-mode-169" style="padding:8px 18px;border-radius:10px;border:none;background:#D2FF3A;color:#080A0F;font-weight:800;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.2s">
-        <span class="material-symbols-outlined" style="font-size:16px">desktop_windows</span>
-        <span>16:9 Landscape Commercial</span>
-      </button>
-      <button id="btn-mode-916" style="padding:8px 18px;border-radius:10px;border:none;background:transparent;color:rgba(255,255,255,0.6);font-weight:600;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.2s">
-        <span class="material-symbols-outlined" style="font-size:16px">smartphone</span>
-        <span>9:16 Mobile Story</span>
-      </button>
-    </div>
-
     <!-- ═══ RESPONSIVE VIDEO PLAYER FRAME ═══ -->
     <div style="max-width:1080px;margin:0 auto">
       <div class="player-frame" id="player-container">
@@ -321,9 +309,7 @@
 </section>
 
 <script>
-  // Video player mode switcher (16:9 vs 9:16)
-  const btn169 = document.getElementById('btn-mode-169');
-  const btn916 = document.getElementById('btn-mode-916');
+  // Video player controls
   const iframe = document.getElementById('showcase-iframe');
   const playerContainer = document.getElementById('player-container');
   const overlay = document.getElementById('player-overlay');
@@ -332,27 +318,9 @@
   overlay.addEventListener('click', () => {
     overlay.style.opacity = '0';
     setTimeout(() => { overlay.style.display = 'none'; }, 300);
-    // Notify iframe to play with audio
     try {
       iframe.contentWindow.postMessage('play', '*');
     } catch(e){}
-  });
-
-  btn169.addEventListener('click', () => {
-    btn169.style.background = '#D2FF3A'; btn169.style.color = '#080A0F'; btn169.style.fontWeight = '800';
-    btn916.style.background = 'transparent'; btn916.style.color = 'rgba(255,255,255,0.6)'; btn916.style.fontWeight = '600';
-    playerContainer.style.aspectRatio = '16/9';
-    playerContainer.style.maxWidth = '100%';
-    iframe.src = '/promo/showcase.html';
-  });
-
-  btn916.addEventListener('click', () => {
-    btn916.style.background = '#D2FF3A'; btn916.style.color = '#080A0F'; btn916.style.fontWeight = '800';
-    btn169.style.background = 'transparent'; btn169.style.color = 'rgba(255,255,255,0.6)'; btn169.style.fontWeight = '600';
-    playerContainer.style.aspectRatio = '9/16';
-    playerContainer.style.maxWidth = '420px';
-    playerContainer.style.margin = '0 auto';
-    iframe.src = '/promo/index.html';
   });
 
   fsBtn.addEventListener('click', () => {
@@ -880,7 +848,6 @@
         <div style="display:flex;flex-direction:column;gap:10px;font-size:13.5px">
           <a href="https://focusdotflow.vercel.app" target="_blank" rel="noopener" style="color:#D2FF3A;text-decoration:none;font-weight:600">Production Web App ↗</a>
           <a href="/promo/showcase.html" target="_blank" rel="noopener" style="color:rgba(255,255,255,0.5);text-decoration:none">16:9 Showcase Video ↗</a>
-          <a href="/promo/index.html" target="_blank" rel="noopener" style="color:rgba(255,255,255,0.5);text-decoration:none">9:16 Mobile Edition ↗</a>
           <a href="https://github.com/manash9-ai/FocusDot" target="_blank" rel="noopener" style="color:rgba(255,255,255,0.5);text-decoration:none">GitHub Repository ↗</a>
         </div>
       </div>
@@ -951,3 +918,4 @@
 
 </body>
 </html>
+
