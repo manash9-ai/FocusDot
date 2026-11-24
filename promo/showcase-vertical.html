@@ -1,0 +1,2214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FocusDot — Official Vertical Product Showcase (9:16)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=JetBrains+Mono:wght@400;600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:#000;font-family:'Inter',sans-serif;overflow:hidden;color:#fff;height:100%}
+  .font-mono{font-family:'JetBrains Mono',monospace;font-feature-settings:"tnum"1,"zero"1;font-variant-numeric:tabular-nums}
+
+  /* ═══ 9:16 VERTICAL STAGE (1080 x 1920) ═══ */
+  #stage-wrapper{
+    position:fixed;top:0;left:0;right:0;bottom:52px;
+    display:flex;align-items:center;justify-content:center;
+    background:#000;
+  }
+  #stage{
+    width:1080px;height:1920px;
+    transform-origin:top left;
+    position:absolute;
+    background:#020407;
+    overflow:hidden;
+  }
+
+  /* ═══ STUDIO CONTROLS ═══ */
+  #controls{
+    position:fixed;bottom:0;left:0;right:0;z-index:9999;height:52px;
+    display:flex;align-items:center;gap:8px;
+    padding:0 18px;background:rgba(4,6,10,0.96);
+    border-top:1px solid rgba(255,255,255,0.08);
+    backdrop-filter:blur(16px);
+  }
+  #controls button{
+    padding:6px 13px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);
+    background:rgba(255,255,255,0.05);color:#fff;font-size:11.5px;cursor:pointer;
+    font-family:'Inter',sans-serif;white-space:nowrap;transition:all 0.15s;
+    display:inline-flex;align-items:center;gap:5px;
+  }
+  #controls button:hover{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.25)}
+  #controls button.active-btn{background:#D2FF3A;color:#080A0F;border-color:#D2FF3A;font-weight:700}
+  #controls input[type=range]{flex:1;accent-color:#D2FF3A;height:4px;cursor:pointer}
+  #controls span{font-size:11px;color:#8E92A0;font-family:'JetBrains Mono',monospace;white-space:nowrap}
+  .sep{width:1px;height:22px;background:rgba(255,255,255,0.1);flex-shrink:0}
+
+  .scene-nav{display:flex;align-items:center;gap:4px}
+  .scene-nav button{
+    padding:4px 9px;font-size:10.5px;border-radius:6px;background:rgba(255,255,255,0.04);
+    border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);
+  }
+  .scene-nav button.cur-scene{
+    background:rgba(210,255,58,0.12);border-color:rgba(210,255,58,0.4);color:#D2FF3A;font-weight:700;
+  }
+
+  /* ═══ BG LAYERS ═══ */
+  #bg-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:0}
+  .vignette{
+    position:absolute;inset:0;
+    background:radial-gradient(ellipse at 50% 50%,transparent 35%,rgba(0,0,0,0.85) 100%);
+    pointer-events:none;z-index:2;
+  }
+  .scanlines{
+    position:absolute;inset:0;z-index:3;pointer-events:none;
+    background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.035) 2px,rgba(0,0,0,0.035) 4px);
+  }
+  .cine-grid{
+    position:absolute;inset:0;z-index:1;pointer-events:none;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.015) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,0.015) 1px,transparent 1px);
+    background-size:68px 120px;
+  }
+
+  /* ═══ SCENES ═══ */
+  .scene{position:absolute;inset:0;z-index:10;opacity:0;pointer-events:none;transition:opacity 0.65s cubic-bezier(0.4,0,0.2,1)}
+  .scene.active{opacity:1;pointer-events:auto}
+
+  /* Vertical Scene Container */
+  .v-stage{
+    position:absolute;inset:0;
+    display:flex;flex-direction:column;align-items:center;justify-content:space-between;
+    padding:70px 50px 80px;text-align:center;
+  }
+
+  /* Top HUD */
+  .top-hud{
+    display:flex;align-items:center;justify-content:space-between;width:100%;
+    padding:0 10px;margin-bottom:20px;
+  }
+  .hud-badge{
+    display:flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;
+    background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);
+    font-size:12px;font-weight:700;color:#fff;
+  }
+  .hud-dot{width:7px;height:7px;border-radius:50%;background:#D2FF3A;box-shadow:0 0 10px #D2FF3A}
+  .hud-time{font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(255,255,255,0.5)}
+
+  /* Titles */
+  .v-title-block{margin-bottom:20px;max-width:880px}
+  .feature-pill{
+    display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:999px;
+    background:rgba(210,255,58,0.1);border:1px solid rgba(210,255,58,0.3);
+    color:#D2FF3A;font-size:12px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;
+  }
+  .v-title{font-size:44px;font-weight:900;letter-spacing:-0.03em;line-height:1.15;margin-bottom:10px}
+  .v-title span{color:#D2FF3A}
+  .v-sub{font-size:16px;color:rgba(255,255,255,0.6);line-height:1.5;max-width:720px;margin:0 auto}
+
+  /* Device chassis in 1080x1920 */
+  .device-v{
+    position:relative;
+    width:480px;height:1020px;
+    background:#080A0F;
+    border-radius:60px;
+    border:11px solid #1A1E2A;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.08),
+      0 35px 90px rgba(0,0,0,0.95),
+      0 0 70px rgba(210,255,58,0.08);
+    overflow:hidden;
+    display:flex;flex-direction:column;
+    flex-shrink:0;
+  }
+
+  .dyn-island{
+    position:absolute;top:14px;left:50%;transform:translateX(-50%);
+    width:125px;height:34px;background:#000;border-radius:20px;z-index:50;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .dyn-camera{width:11px;height:11px;border-radius:50%;background:#1a1a1a;border:1px solid rgba(255,255,255,0.08)}
+  .dyn-status-dot{width:8px;height:8px;border-radius:50%}
+
+  .app-scroll{flex:1;display:flex;flex-direction:column;overflow:hidden;padding-top:54px}
+  .app-header{
+    padding:12px 22px;display:flex;align-items:center;justify-content:space-between;
+    border-bottom:1px solid rgba(255,255,255,0.07);flex-shrink:0;
+  }
+  .app-logo{display:flex;align-items:center;gap:12px}
+  .app-logo-icon{
+    width:42px;height:42px;border-radius:14px;background:rgba(255,255,255,0.03);
+    border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;
+    color:#D2FF3A;
+  }
+  .app-logo-text h2{font-size:22px;font-weight:900;letter-spacing:-0.03em;line-height:1}
+  .app-logo-text p{font-size:10.5px;text-transform:uppercase;letter-spacing:0.14em;color:rgba(255,255,255,0.38);margin-top:2px}
+  .deep-focus-pill{
+    display:flex;align-items:center;gap:6px;padding:6px 13px;border-radius:999px;
+    background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);
+    font-size:11.5px;font-weight:600;color:rgba(255,255,255,0.8);
+  }
+  .dfp-dot{width:7px;height:7px;border-radius:50%;background:#D2FF3A;box-shadow:0 0 6px rgba(210,255,58,0.8)}
+
+  /* Timer screen elements */
+  .timer-screen{flex:1;padding:16px 20px;display:flex;flex-direction:column;gap:14px;overflow:hidden}
+  .preset-pills{display:flex;gap:9px}
+  .pill{padding:9px 18px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:default;white-space:nowrap}
+  .pill-active{background:#D2FF3A;color:#080A0F;box-shadow:0 0 14px rgba(210,255,58,0.3)}
+  .pill-idle{background:#10131B;border:1px solid #1A1E2A;color:rgba(255,255,255,0.45)}
+
+  .consistency-card{
+    background:#10131B;border:1px solid rgba(255,255,255,0.07);border-radius:18px;
+    padding:13px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
+  }
+  .cc-left{display:flex;align-items:center;gap:12px}
+  .cc-flame{
+    width:46px;height:46px;border-radius:13px;
+    background:linear-gradient(135deg,rgba(210,255,58,0.18),rgba(16,185,129,0.08));
+    border:1px solid rgba(210,255,58,0.28);display:flex;align-items:center;justify-content:center;
+    color:#D2FF3A;
+  }
+  .cc-label{font-size:14px;font-weight:700;color:#fff}
+  .streak-badge{
+    display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;
+    background:rgba(210,255,58,0.08);border:1px solid rgba(210,255,58,0.22);
+    color:#D2FF3A;font-size:11px;font-weight:700;margin-top:2px;
+  }
+  .mini-ring{position:relative;width:48px;height:48px;flex-shrink:0}
+  .mini-ring svg{width:48px;height:48px;transform:rotate(-90deg)}
+  .mini-ring span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;font-family:'JetBrains Mono',monospace}
+
+  /* Orb Frame */
+  .orb-zone{display:flex;flex-direction:column;align-items:center;position:relative;flex-shrink:0;margin:6px 0}
+  .orb-glow-bg{
+    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    width:320px;height:320px;border-radius:50%;filter:blur(65px);opacity:0.45;
+    transition:background 0.9s ease;pointer-events:none;z-index:0;
+  }
+  .orb-frame{position:relative;width:300px;height:300px;flex-shrink:0}
+  .orb-svg-ring{position:absolute;inset:0;z-index:20;pointer-events:none}
+  .orb-canvas-wrapper{
+    position:absolute;inset:15px;border-radius:50%;overflow:hidden;
+    background:#03060B;z-index:10;border:1px solid rgba(255,255,255,0.07);
+  }
+  .orb-glass{
+    position:absolute;inset:0;border-radius:50%;z-index:30;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:16px;
+    background:radial-gradient(circle at 50% 50%,rgba(6,8,14,0.72) 0%,rgba(6,8,14,0.4) 50%,transparent 78%);
+  }
+  .flow-status-pill{
+    display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;
+    background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.14);
+    font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#fff;
+    margin-bottom:6px;
+  }
+  .flow-ping{width:7px;height:7px;border-radius:50%;background:#D2FF3A}
+  .timer-digits{font-family:'JetBrains Mono',monospace;font-size:62px;font-weight:900;color:#fff;letter-spacing:-0.02em;line-height:1}
+  .timer-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.6);margin-top:4px}
+  .audio-pill{
+    margin-top:8px;display:flex;align-items:center;gap:8px;
+    padding:5px 14px;border-radius:999px;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.13);
+  }
+  .eq-bars{display:flex;align-items:flex-end;gap:3px;height:13px}
+  .eq-bar{width:3px;border-radius:2px;background:#D2FF3A}
+  .audio-label{font-size:11px;font-weight:700;color:rgba(255,255,255,0.88)}
+  .orb-switcher{
+    display:flex;align-items:center;gap:7px;padding:6px 14px;border-radius:999px;
+    background:#0E1119;border:1px solid rgba(255,255,255,0.07);
+    font-size:11px;color:rgba(255,255,255,0.6);margin-top:10px;
+  }
+  .orb-sw-dot{width:9px;height:9px;border-radius:50%}
+
+  /* Soundscape */
+  .soundscape-card{background:#0E1119;border:1px solid rgba(255,255,255,0.06);border-radius:18px;padding:13px 16px;flex-shrink:0}
+  .sc-header{display:flex;align-items:center;justify-content:space-between;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.05)}
+  .sc-track{display:flex;align-items:center;gap:10px}
+  .sc-icon{width:36px;height:36px;border-radius:11px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+  .sc-name{font-size:13px;font-weight:600;color:#fff}
+  .sc-desc{font-size:10px;color:rgba(255,255,255,0.38);margin-top:2px}
+  .sc-chips{display:flex;gap:7px;margin-top:10px}
+  .sc-chip{flex:1;padding:8px 6px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;color:rgba(255,255,255,0.5)}
+  .sc-chip.chip-active{background:rgba(210,255,58,0.1);border-color:rgba(210,255,58,0.3);color:#D2FF3A;font-weight:700}
+
+  /* Bottom stats grid */
+  .v-stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;width:100%;max-width:880px;margin-top:20px}
+  .v-stat-card{
+    background:rgba(17,20,29,0.75);backdrop-filter:blur(20px);
+    border:1px solid rgba(255,255,255,0.08);border-radius:18px;
+    padding:16px 14px;display:flex;flex-direction:column;align-items:center;text-align:center;
+  }
+  .v-stat-num{font-size:24px;font-weight:900;color:#D2FF3A;font-family:'JetBrains Mono',monospace}
+  .v-stat-label{font-size:12px;color:rgba(255,255,255,0.5);margin-top:4px;font-weight:600}
+
+  /* Brand scene styles */
+  .brand-beacon{
+    width:20px;height:20px;border-radius:50%;background:#D2FF3A;
+    box-shadow:0 0 35px #D2FF3A,0 0 80px rgba(210,255,58,0.6);margin-bottom:34px;
+  }
+  .brand-bolt{
+    width:84px;height:84px;border-radius:24px;
+    background:rgba(210,255,58,0.08);border:1px solid rgba(210,255,58,0.3);
+    display:flex;align-items:center;justify-content:center;margin-bottom:28px;
+  }
+  .brand-title{
+    font-size:96px;font-weight:900;letter-spacing:-0.04em;
+    background:linear-gradient(135deg,#fff 0%,rgba(210,255,58,0.7) 100%);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  }
+  .brand-sub{font-size:24px;font-weight:600;letter-spacing:0.25em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-top:16px}
+  .brand-tagline{font-size:18px;color:rgba(255,255,255,0.3);margin-top:24px}
+
+  /* Scene 3 Orb Hero */
+  .orb-hero-frame{position:relative;width:520px;height:520px;display:flex;align-items:center;justify-content:center;margin:20px 0}
+  .orb-hero-glow{position:absolute;width:640px;height:640px;border-radius:50%;filter:blur(85px);opacity:0.4;transition:background 0.9s ease}
+  .orb-hero-canvas-wrap{position:absolute;inset:20px;border-radius:50%;overflow:hidden;background:#03060B;border:2px solid rgba(255,255,255,0.12)}
+  .orb-hero-glass{position:absolute;inset:0;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
+
+  .theme-chips-row{display:flex;gap:10px;justify-content:center;width:100%;max-width:880px;margin-top:14px;flex-wrap:wrap}
+  .theme-chip{
+    padding:10px 18px;border-radius:14px;background:rgba(255,255,255,0.03);
+    border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;
+  }
+  .theme-chip.active-theme-chip{background:rgba(255,255,255,0.09);border-color:rgba(255,255,255,0.3);color:#fff}
+  .tc-dot{width:10px;height:10px;border-radius:50%}
+
+  /* Bottom Watermark */
+  .v-watermark{font-size:12px;color:rgba(255,255,255,0.4);font-family:'JetBrains Mono',monospace;margin-top:16px}
+</style>
+</head>
+<body>
+
+<div id="stage-wrapper">
+  <div id="stage">
+    <!-- Background Canvas -->
+    <canvas id="bg-canvas" width="1080" height="1920"></canvas>
+    <div class="vignette"></div>
+    <div class="scanlines"></div>
+    <div class="cine-grid"></div>
+
+    <!-- ═══ SCENE 1: BRAND OPENING ═══ -->
+    <div class="scene active" id="scene-1">
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:60px">
+        <div class="brand-beacon"></div>
+        <div class="brand-bolt">
+          <span class="material-symbols-outlined" style="font-size:46px;color:#D2FF3A;font-variation-settings:'FILL' 1">bolt</span>
+        </div>
+        <h1 class="brand-title">FOCUSDOT</h1>
+        <p class="brand-sub">DEEP FLOW MODE</p>
+        <div style="width:140px;height:1px;background:linear-gradient(90deg,transparent,#D2FF3A,transparent);margin:32px 0"></div>
+        <p class="brand-tagline">Your attention is your greatest asset.</p>
+        <div class="v-watermark" style="position:absolute;bottom:40px">1080 × 1920  •  VERTICAL REEL</div>
+      </div>
+    </div>
+
+    <!-- ═══ SCENE 2: TIMER SCREEN ═══ -->
+    <div class="scene" id="scene-2">
+      <div class="v-stage">
+        <!-- Top HUD & Title -->
+        <div>
+          <div class="top-hud">
+            <div class="hud-badge"><div class="hud-dot"></div><span>FOCUSDOT</span></div>
+            <div class="hud-time" id="s2-time">00:08 / 00:58</div>
+          </div>
+          <div class="v-title-block">
+            <div class="feature-pill"><span class="material-symbols-outlined" style="font-size:14px">hourglass_empty</span><span>COSMIC ORB ENGINE</span></div>
+            <h2 class="v-title">Engineered for <span>pure attention.</span></h2>
+            <p class="v-sub">A timer that guides your focus, not just counts it.</p>
+          </div>
+        </div>
+
+        <!-- Center: Device Mockup -->
+        <div class="device-v">
+          <div class="dyn-island"><div class="dyn-camera"></div><div class="dyn-status-dot" style="background:#D2FF3A;box-shadow:0 0 8px #D2FF3A"></div></div>
+          <div class="app-scroll">
+            <div class="app-header">
+              <div class="app-logo">
+                <div class="app-logo-icon"><span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 1">bolt</span></div>
+                <div class="app-logo-text"><h2>FocusDot</h2><p>Deep Flow Mode</p></div>
+              </div>
+              <div class="deep-focus-pill"><div class="dfp-dot"></div>Deep Focus</div>
+            </div>
+            <div class="timer-screen">
+              <div class="preset-pills">
+                <div class="pill pill-active">25m Pomodoro</div>
+                <div class="pill pill-idle">30m Deep Work</div>
+                <div class="pill pill-idle">45m Exam Prep</div>
+              </div>
+              <div class="consistency-card">
+                <div class="cc-left">
+                  <div class="cc-flame"><span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 1">local_fire_department</span></div>
+                  <div>
+                    <div class="cc-label">Daily Consistency</div>
+                    <div class="streak-badge"><span class="material-symbols-outlined" style="font-size:11px">local_fire_department</span><span>14-Day Streak</span></div>
+                  </div>
+                </div>
+                <div class="mini-ring">
+                  <svg viewBox="0 0 36 36"><path stroke="#1E2330" stroke-width="3.5" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/><path stroke="#D2FF3A" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="75, 100" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/></svg>
+                  <span>3/4</span>
+                </div>
+              </div>
+              <div class="orb-zone">
+                <div class="orb-glow-bg" id="orb-glow-bg"></div>
+                <div class="orb-frame">
+                  <svg class="orb-svg-ring" viewBox="0 0 300 300"><circle cx="150" cy="150" r="138" stroke="#1A1E2A" stroke-width="7" fill="none"/><circle id="timer-ring-svg" cx="150" cy="150" r="138" stroke="#D2FF3A" stroke-width="7" stroke-linecap="round" fill="none" stroke-dasharray="867" stroke-dashoffset="180" style="transform:rotate(-90deg);transform-origin:50% 50%"/></svg>
+                  <div class="orb-canvas-wrapper"><canvas id="orb-canvas" width="400" height="400" style="width:100%;height:100%"></canvas></div>
+                  <div class="orb-glass">
+                    <div class="flow-status-pill"><div class="flow-ping"></div><span>Flow Ready</span></div>
+                    <div class="timer-digits" id="timer-display">25:00</div>
+                    <div class="timer-label">Pomodoro Focus</div>
+                    <div class="audio-pill"><div class="eq-bars"><div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div></div><div class="audio-label">40Hz Gamma</div></div>
+                  </div>
+                </div>
+                <div class="orb-switcher"><div class="orb-sw-dot" id="orb-sw-dot" style="background:#D2FF3A;box-shadow:0 0 8px #D2FF3A"></div><span>Focus Sphere:</span><strong id="orb-sw-label" style="color:#fff">Bioluminescent Flow</strong></div>
+              </div>
+              <div class="soundscape-card">
+                <div class="sc-header">
+                  <div class="sc-track"><div class="sc-icon">🧠</div><div><div class="sc-name">Binaural Beats (40Hz)</div><div class="sc-desc">Gamma wave focus • 40Hz acoustic sync</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Stats -->
+        <div>
+          <div class="v-stats-grid">
+            <div class="v-stat-card"><div class="v-stat-num">40Hz</div><div class="v-stat-label">Audio Sync</div></div>
+            <div class="v-stat-card"><div class="v-stat-num">25m</div><div class="v-stat-label">Deep Flow</div></div>
+            <div class="v-stat-card"><div class="v-stat-num">5</div><div class="v-stat-label">Cosmic Themes</div></div>
+          </div>
+          <div class="v-watermark">focusdotflow.vercel.app</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SCENE 3: 5 COSMIC THEMES (HERO ORB) ═══ -->
+    <div class="scene" id="scene-3">
+      <div class="v-stage">
+        <div>
+          <div class="top-hud">
+            <div class="hud-badge"><div class="hud-dot"></div><span>THEME GALLERY</span></div>
+            <div class="hud-time">00:22 / 00:58</div>
+          </div>
+          <div class="v-title-block">
+            <div class="feature-pill"><span class="material-symbols-outlined" style="font-size:14px">palette</span><span>5 VISUAL THEMES</span></div>
+            <h2 class="v-title">Every session<br>feels <span>different.</span></h2>
+            <p class="v-sub">5 scientifically tuned ambient themes matching your cognitive demand.</p>
+          </div>
+        </div>
+
+        <!-- Large Hero Orb -->
+        <div class="orb-hero-frame">
+          <div class="orb-hero-glow" id="scene3-glow" style="background:radial-gradient(circle,#D2FF3A 0%,transparent 70%)"></div>
+          <svg class="orb-svg-ring" viewBox="0 0 520 520"><circle cx="260" cy="260" r="240" stroke="#1A1E2A" stroke-width="8" fill="none"/><circle id="scene3-ring" cx="260" cy="260" r="240" stroke="#D2FF3A" stroke-width="8" stroke-linecap="round" fill="none" stroke-dasharray="1507" stroke-dashoffset="300" style="transform:rotate(-90deg);transform-origin:50% 50%"/></svg>
+          <div class="orb-hero-canvas-wrap"><canvas id="orb-canvas-3" width="600" height="600" style="width:100%;height:100%"></canvas></div>
+          <div class="orb-hero-glass">
+            <div class="flow-status-pill"><div class="flow-ping"></div><span>Live Shader</span></div>
+            <div class="timer-digits" id="s3-timer" style="font-size:80px">25:00</div>
+            <div class="timer-label" id="s3-orb-name" style="font-size:14px;color:#D2FF3A;margin-top:6px">Bioluminescent Flow</div>
+            <div class="audio-pill" style="margin-top:14px"><div class="eq-bars"><div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div></div><div class="audio-label" id="s3-audio">40Hz Gamma</div></div>
+          </div>
+        </div>
+
+        <!-- Theme Chips -->
+        <div>
+          <div class="theme-chips-row">
+            <div class="theme-chip active-theme-chip" id="tc-0"><div class="tc-dot" style="background:#D2FF3A"></div><span>Bioluminescent</span></div>
+            <div class="theme-chip" id="tc-1"><div class="tc-dot" style="background:#A855F7"></div><span>Cosmic Amethyst</span></div>
+            <div class="theme-chip" id="tc-2"><div class="tc-dot" style="background:#FF2A55"></div><span>Crimson Flare</span></div>
+            <div class="theme-chip" id="tc-3"><div class="tc-dot" style="background:#00F5FF"></div><span>Cyber Aurora</span></div>
+            <div class="theme-chip" id="tc-4"><div class="tc-dot" style="background:#F59E0B"></div><span>Solar Gold</span></div>
+          </div>
+          <div class="v-watermark">Raymarched WebGL Simplex Shader</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SCENE 4: DAILY & COGNITIVE ═══ -->
+    <div class="scene" id="scene-4">
+      <div class="v-stage">
+        <div>
+          <div class="top-hud">
+            <div class="hud-badge"><div class="hud-dot"></div><span>MENTAL CALIBRATION</span></div>
+            <div class="hud-time">00:32 / 00:58</div>
+          </div>
+          <div class="v-title-block">
+            <div class="feature-pill"><span class="material-symbols-outlined" style="font-size:14px">psychology</span><span>DAILY PLANNER</span></div>
+            <h2 class="v-title">Know your <span>mental state.</span></h2>
+            <p class="v-sub">Track cognitive clarity before you begin. Calibrate habits and sleep.</p>
+          </div>
+        </div>
+
+        <!-- Center: Device Mockup -->
+        <div class="device-v">
+          <div class="dyn-island"><div class="dyn-camera"></div><div class="dyn-status-dot" style="background:#D2FF3A;box-shadow:0 0 8px #D2FF3A"></div></div>
+          <div class="app-scroll">
+            <div class="app-header">
+              <div class="app-logo">
+                <div class="app-logo-icon"><span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 1">bolt</span></div>
+                <div class="app-logo-text"><h2>FocusDot</h2><p>Deep Flow Mode</p></div>
+              </div>
+              <div class="deep-focus-pill"><div class="dfp-dot"></div>Deep Focus</div>
+            </div>
+            <!-- Planner Screen Content -->
+            <div style="padding:16px 20px;display:flex;flex-direction:column;gap:14px">
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <div><div style="font-size:11px;color:#D2FF3A;font-weight:700">• FRIDAY, OCT 24</div><div style="font-size:24px;font-weight:900">Howdy, Swati!</div></div>
+                <div style="text-align:right"><div style="font-size:11px;color:#D2FF3A;font-weight:700">Level 8 Flow</div><div style="width:70px;height:4px;background:#181C26;border-radius:2px;margin-top:4px"><div style="width:75%;height:100%;background:#D2FF3A;border-radius:2px"></div></div></div>
+              </div>
+              <!-- Weekly Calendar strip -->
+              <div style="display:flex;gap:6px;justify-content:space-between;padding:10px 12px;background:#10131B;border-radius:14px;border:1px solid rgba(255,255,255,0.06)">
+                <div style="text-align:center"><div style="font-size:9.5px;color:rgba(255,255,255,0.4)">Wed</div><div style="font-size:12px;font-weight:700">21</div></div>
+                <div style="text-align:center"><div style="font-size:9.5px;color:rgba(255,255,255,0.4)">Thu</div><div style="font-size:12px;font-weight:700">22</div></div>
+                <div style="text-align:center"><div style="font-size:9.5px;color:rgba(255,255,255,0.4)">Fri</div><div style="font-size:12px;font-weight:700">23</div></div>
+                <div style="text-align:center"><div style="font-size:9.5px;color:rgba(255,255,255,0.4)">Sat</div><div style="font-size:12px;font-weight:700">24</div></div>
+                <div style="text-align:center;background:#D2FF3A;color:#080A0F;padding:2px 8px;border-radius:8px"><div style="font-size:9.5px;font-weight:700">Sun</div><div style="font-size:13px;font-weight:900">25</div></div>
+                <div style="text-align:center"><div style="font-size:9.5px;color:rgba(255,255,255,0.4)">Mon</div><div style="font-size:12px;font-weight:700">26</div></div>
+              </div>
+              <!-- Focus state chips -->
+              <div style="background:#10131B;border-radius:14px;padding:12px;border:1px solid rgba(255,255,255,0.06)">
+                <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.5);margin-bottom:8px">Cognitive Focus State</div>
+                <div style="display:flex;gap:6px">
+                  <div style="padding:6px 10px;border-radius:9px;background:rgba(255,255,255,0.04);font-size:11px">Brain Fog</div>
+                  <div style="padding:6px 10px;border-radius:9px;background:rgba(255,255,255,0.04);font-size:11px">Restless</div>
+                  <div style="padding:6px 10px;border-radius:9px;background:rgba(255,255,255,0.04);font-size:11px">Balanced</div>
+                  <div style="padding:6px 10px;border-radius:9px;background:#D2FF3A;color:#080A0F;font-weight:700;font-size:11px">In Flow</div>
+                  <div style="padding:6px 10px;border-radius:9px;background:rgba(255,255,255,0.04);font-size:11px">Peak</div>
+                </div>
+              </div>
+              <!-- Trackers: Sleep & Hydration -->
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                <div style="background:#10131B;border-radius:14px;padding:12px;border:1px solid rgba(255,255,255,0.06);text-align:center">
+                  <div style="font-size:11px;color:rgba(255,255,255,0.5)">🌙 Sleep Target</div>
+                  <div style="font-size:20px;font-weight:900;color:#D2FF3A;margin:4px 0">6.5 / 8h</div>
+                  <div style="font-size:9.5px;color:rgba(255,255,255,0.4)">6h 30m of 8h goal</div>
+                </div>
+                <div style="background:#10131B;border-radius:14px;padding:12px;border:1px solid rgba(255,255,255,0.06);text-align:center">
+                  <div style="font-size:11px;color:rgba(255,255,255,0.5)">💧 Hydration</div>
+                  <div style="font-size:20px;font-weight:900;color:#A855F7;margin:4px 0">5 / 8</div>
+                  <div style="font-size:9.5px;color:rgba(255,255,255,0.4)">1,250ml logged</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Stats -->
+        <div>
+          <div class="v-stats-grid">
+            <div class="v-stat-card"><div class="v-stat-num">In Flow</div><div class="v-stat-label">Cognitive State</div></div>
+            <div class="v-stat-card"><div class="v-stat-num">6.5h</div><div class="v-stat-label">Sleep Logged</div></div>
+            <div class="v-stat-card"><div class="v-stat-num">14-Day</div><div class="v-stat-label">Streak Active</div></div>
+          </div>
+          <div class="v-watermark">focusdotflow.vercel.app</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SCENE 5: INSIGHTS & PROGRESS ═══ -->
+    <div class="scene" id="scene-5">
+      <div class="v-stage">
+        <div>
+          <div class="top-hud">
+            <div class="hud-badge"><div class="hud-dot"></div><span>STUDENT ANALYTICS</span></div>
+            <div class="hud-time">00:42 / 00:58</div>
+          </div>
+          <div class="v-title-block">
+            <div class="feature-pill"><span class="material-symbols-outlined" style="font-size:14px">insights</span><span>PROGRESS RADAR</span></div>
+            <h2 class="v-title">See your <span>flow data.</span></h2>
+            <p class="v-sub">Real-time metrics tracking session depth, consistency streaks, and daily hours.</p>
+          </div>
+        </div>
+
+        <!-- Center: Device Mockup -->
+        <div class="device-v">
+          <div class="dyn-island"><div class="dyn-camera"></div><div class="dyn-status-dot" style="background:#D2FF3A;box-shadow:0 0 8px #D2FF3A"></div></div>
+          <div class="app-scroll">
+            <div class="app-header">
+              <div class="app-logo">
+                <div class="app-logo-icon"><span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 1">bolt</span></div>
+                <div class="app-logo-text"><h2>FocusDot</h2><p>Deep Flow Mode</p></div>
+              </div>
+              <div class="deep-focus-pill"><div class="dfp-dot"></div>Deep Focus</div>
+            </div>
+            <!-- Insights Content -->
+            <div style="padding:20px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px">
+              <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.6)">Today's Focus Summary</div>
+              <!-- Radial ring -->
+              <div style="position:relative;width:240px;height:240px;display:flex;align-items:center;justify-content:center">
+                <svg viewBox="0 0 100 100" style="width:100%;height:100%;transform:rotate(-90deg)"><circle cx="50" cy="50" r="40" stroke="#181C26" stroke-width="8" fill="none"/><circle cx="50" cy="50" r="40" stroke="#D2FF3A" stroke-width="8" stroke-linecap="round" fill="none" stroke-dasharray="251.2" stroke-dashoffset="62.8"/></svg>
+                <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+                  <div style="font-size:36px;font-weight:900;font-family:'JetBrains Mono',monospace">3h 45m</div>
+                  <div style="font-size:12px;color:rgba(255,255,255,0.5)">of 5h Daily Goal (75%)</div>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%">
+                <div style="background:#10131B;border-radius:14px;padding:14px;border:1px solid rgba(255,255,255,0.06)">
+                  <div style="font-size:11px;color:rgba(255,255,255,0.5)">Completed</div>
+                  <div style="font-size:18px;font-weight:900;margin-top:2px">3 Sessions</div>
+                </div>
+                <div style="background:#10131B;border-radius:14px;padding:14px;border:1px solid rgba(255,255,255,0.06)">
+                  <div style="font-size:11px;color:rgba(255,255,255,0.5)">Deep Flow Rate</div>
+                  <div style="font-size:18px;font-weight:900;color:#D2FF3A;margin-top:2px">94%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Stats -->
+        <div>
+          <div class="v-stats-grid">
+            <div class="v-stat-card"><div class="v-stat-num">94%</div><div class="v-stat-label">Flow Depth</div></div>
+            <div class="v-stat-card"><div class="v-stat-num">3.8h</div><div class="v-stat-label">Daily Avg</div></div>
+            <div class="v-stat-card"><div class="v-stat-num">14-Day</div><div class="v-stat-label">Streak Record</div></div>
+          </div>
+          <div class="v-watermark">focusdotflow.vercel.app</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SCENE 6: STUDY PLANNER ═══ -->
+    <div class="scene" id="scene-6">
+      <div class="v-stage">
+        <div>
+          <div class="top-hud">
+            <div class="hud-badge"><div class="hud-dot"></div><span>CURRICULUM BLOCKS</span></div>
+            <div class="hud-time">00:49 / 00:58</div>
+          </div>
+          <div class="v-title-block">
+            <div class="feature-pill"><span class="material-symbols-outlined" style="font-size:14px">checklist</span><span>BLOCK EXECUTION</span></div>
+            <h2 class="v-title">Every subject.<br>Every <span>block.</span></h2>
+            <p class="v-sub">Organize your curriculum into high-yield study sessions with intelligent time blocks.</p>
+          </div>
+        </div>
+
+        <!-- Center: Device Mockup -->
+        <div class="device-v">
+          <div class="dyn-island"><div class="dyn-camera"></div><div class="dyn-status-dot" style="background:#D2FF3A;box-shadow:0 0 8px #D2FF3A"></div></div>
+          <div class="app-scroll">
+            <div class="app-header">
+              <div class="app-logo">
+                <div class="app-logo-icon"><span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 1">bolt</span></div>
+                <div class="app-logo-text"><h2>FocusDot</h2><p>Deep Flow Mode</p></div>
+              </div>
+              <div class="deep-focus-pill"><div class="dfp-dot"></div>Deep Focus</div>
+            </div>
+            <!-- Study Plan Tasks -->
+            <div style="padding:16px 20px;display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <div><div style="font-size:14px;font-weight:700">Today's Study Plan</div><div style="font-size:11px;color:rgba(255,255,255,0.4)">0 of 3 tasks completed</div></div>
+                <div style="font-size:11px;font-weight:700;color:#D2FF3A;padding:4px 8px;border-radius:6px;background:rgba(210,255,58,0.1)">+ Add Task</div>
+              </div>
+              <!-- Task 1 -->
+              <div style="background:#10131B;border-radius:14px;padding:14px;border:1px solid rgba(255,255,255,0.06);display:flex;flex-direction:column;gap:6px">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <div style="font-size:13.5px;font-weight:700">Chemistry — Haloalkanes</div>
+                  <div style="font-size:10px;padding:3px 8px;border-radius:999px;background:rgba(210,255,58,0.15);color:#D2FF3A;font-weight:700">In Progress</div>
+                </div>
+                <div style="font-size:11px;color:rgba(255,255,255,0.4)">SN1 and SN2 reaction mechanisms & practice sheet</div>
+                <div style="font-size:10.5px;color:rgba(255,255,255,0.5)">7:00 PM – 7:45 PM  •  45 mins</div>
+              </div>
+              <!-- Task 2 -->
+              <div style="background:#10131B;border-radius:14px;padding:14px;border:1px solid rgba(255,255,255,0.06);display:flex;flex-direction:column;gap:6px">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <div style="font-size:13.5px;font-weight:700">Mathematics — Vector Calculus</div>
+                  <div style="font-size:10px;padding:3px 8px;border-radius:999px;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6)">Upcoming</div>
+                </div>
+                <div style="font-size:11px;color:rgba(255,255,255,0.4)">Surface integrals & Stokes' Theorem proofs</div>
+                <div style="font-size:10.5px;color:rgba(255,255,255,0.5)">8:00 PM – 9:00 PM  •  60 mins</div>
+              </div>
+              <!-- Task 3 -->
+              <div style="background:#10131B;border-radius:14px;padding:14px;border:1px solid rgba(255,255,255,0.06);display:flex;flex-direction:column;gap:6px">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <div style="font-size:13.5px;font-weight:700">Physics — Electromagnetism</div>
+                  <div style="font-size:10px;padding:3px 8px;border-radius:999px;background:rgba(16,185,129,0.15);color:#10B981;font-weight:700">Completed</div>
+                </div>
+                <div style="font-size:11px;color:rgba(255,255,255,0.4)">Gauss' Law problem set #4 and dielectric spheres</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Stats -->
+        <div>
+          <div class="v-stats-grid">
+            <div class="v-stat-card"><div class="v-stat-num">45m</div><div class="v-stat-label">Chemistry Block</div></div>
+            <div class="v-stat-card"><div class="v-stat-num">60m</div><div class="v-stat-label">Maths Block</div></div>
+            <div class="v-stat-card"><div class="v-stat-num">3</div><div class="v-stat-label">Daily Modules</div></div>
+          </div>
+          <div class="v-watermark">focusdotflow.vercel.app</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SCENE 7: BRAND FINALE ═══ -->
+    <div class="scene" id="scene-7">
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:60px">
+        <div class="brand-beacon"></div>
+        <h1 class="brand-title">FOCUSDOT</h1>
+        <p class="brand-sub">DEEP FLOW MODE</p>
+        <p style="font-size:24px;font-style:italic;color:rgba(255,255,255,0.7);margin:24px 0">"Focus on what matters."</p>
+        <div style="display:flex;gap:12px;margin:16px 0">
+          <div style="padding:6px 16px;border-radius:999px;background:rgba(210,255,58,0.1);border:1px solid rgba(210,255,58,0.3);color:#D2FF3A;font-size:12px;font-weight:700">Standalone PWA</div>
+          <div style="padding:6px 16px;border-radius:999px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:#fff;font-size:12px">Web Application</div>
+        </div>
+        <div style="font-size:20px;font-weight:900;color:#D2FF3A;margin-top:20px">focusdotflow.vercel.app</div>
+        <div class="v-watermark" style="position:absolute;bottom:40px">OFFICIAL LAUNCH PRODUCTION</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Studio Controls -->
+<div id="controls">
+  <button id="btn-play">▶ Play</button>
+  <button id="btn-rewind">↺ Restart</button>
+  <div class="sep"></div>
+  <span id="time-display">00:00 / 00:58</span>
+  <input type="range" id="scrubber" min="0" max="58000" value="0">
+  <div class="sep"></div>
+  <button id="btn-audio">🔊 Audio: On</button>
+  <button id="btn-fs">⛶ Fullscreen</button>
+  <div class="sep"></div>
+  <div class="scene-nav">
+    <button data-scene="0" class="cur-scene">S1</button>
+    <button data-scene="1">S2</button>
+    <button data-scene="2">S3</button>
+    <button data-scene="3">S4</button>
+    <button data-scene="4">S5</button>
+    <button data-scene="5">S6</button>
+    <button data-scene="6">S7</button>
+  </div>
+  <div class="sep"></div>
+  <a href="/public/videos/focusdot-showcase-vertical.mp4" download="focusdot-showcase-vertical.mp4" style="text-decoration:none">
+    <button style="background:#D2FF3A;color:#080A0F;font-weight:700;border-color:#D2FF3A">📥 Download 9:16 MP4</button>
+  </a>
+</div>
+
+<script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FocusDot — Official Product Showcase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=JetBrains+Mono:wght@400;600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:#000;font-family:'Inter',sans-serif;overflow:hidden;color:#fff;height:100%}
+  .font-mono{font-family:'JetBrains Mono',monospace;font-feature-settings:"tnum"1,"zero"1;font-variant-numeric:tabular-nums}
+
+  /* ═══ STAGE SCALING ═══ */
+  #stage-wrapper{
+    position:fixed;top:0;left:0;right:0;bottom:52px;
+    display:flex;align-items:center;justify-content:center;
+    background:#000;
+  }
+  #stage{
+    width:1920px;height:1080px;
+    transform-origin:top left;
+    position:absolute;
+    background:#020407;
+    overflow:hidden;
+  }
+
+  /* ═══ STUDIO CONTROLS ═══ */
+  #controls{
+    position:fixed;bottom:0;left:0;right:0;z-index:9999;height:52px;
+    display:flex;align-items:center;gap:8px;
+    padding:0 18px;background:rgba(4,6,10,0.96);
+    border-top:1px solid rgba(255,255,255,0.08);
+    backdrop-filter:blur(16px);
+  }
+  #controls button{
+    padding:6px 13px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);
+    background:rgba(255,255,255,0.05);color:#fff;font-size:11.5px;cursor:pointer;
+    font-family:'Inter',sans-serif;white-space:nowrap;transition:all 0.15s;
+    display:inline-flex;align-items:center;gap:5px;
+  }
+  #controls button:hover{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.25)}
+  #controls button.active-btn{background:#D2FF3A;color:#080A0F;border-color:#D2FF3A;font-weight:700}
+  #controls input[type=range]{flex:1;accent-color:#D2FF3A;height:4px;cursor:pointer}
+  #controls span{font-size:11px;color:#8E92A0;font-family:'JetBrains Mono',monospace;white-space:nowrap}
+  .sep{width:1px;height:22px;background:rgba(255,255,255,0.1);flex-shrink:0}
+
+  .scene-nav{display:flex;align-items:center;gap:4px}
+  .scene-nav button{
+    padding:4px 9px;font-size:10.5px;border-radius:6px;background:rgba(255,255,255,0.04);
+    border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);
+  }
+  .scene-nav button.cur-scene{
+    background:rgba(210,255,58,0.12);border-color:rgba(210,255,58,0.4);color:#D2FF3A;font-weight:700;
+  }
+
+  /* ═══ BG LAYERS ═══ */
+  #bg-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:0}
+  .vignette{
+    position:absolute;inset:0;
+    background:radial-gradient(ellipse at 50% 50%,transparent 35%,rgba(0,0,0,0.78) 100%);
+    pointer-events:none;z-index:2;
+  }
+  .scanlines{
+    position:absolute;inset:0;z-index:3;pointer-events:none;
+    background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.035) 2px,rgba(0,0,0,0.035) 4px);
+  }
+  .cine-grid{
+    position:absolute;inset:0;z-index:1;pointer-events:none;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.015) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,0.015) 1px,transparent 1px);
+    background-size:120px 68px;
+  }
+  .accent-line-top{
+    position:absolute;top:0;left:0;right:0;height:2px;z-index:4;
+    background:linear-gradient(90deg,transparent 0%,rgba(210,255,58,0) 20%,rgba(210,255,58,0.65) 50%,rgba(210,255,58,0) 80%,transparent);
+    animation:lineFlash 7s ease-in-out infinite;
+  }
+  .accent-line-bottom{
+    position:absolute;bottom:0;left:0;right:0;height:1px;z-index:4;
+    background:linear-gradient(90deg,transparent,rgba(210,255,58,0.35),transparent);
+  }
+  @keyframes lineFlash{0%,100%{opacity:0.35}50%{opacity:1}}
+
+  /* ═══ SCENES ═══ */
+  .scene{position:absolute;inset:0;z-index:10;opacity:0;pointer-events:none;transition:opacity 0.65s cubic-bezier(0.4,0,0.2,1)}
+  .scene.active{opacity:1;pointer-events:auto}
+
+  /* ═══ SCENE 1: BRAND OPENING ═══ */
+  #scene-1{display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .brand-beacon{
+    width:14px;height:14px;border-radius:50%;background:#D2FF3A;
+    box-shadow:0 0 30px #D2FF3A,0 0 70px rgba(210,255,58,0.5),0 0 140px rgba(210,255,58,0.25);
+    margin-bottom:34px;
+    animation:beaconPulse 2.2s ease-in-out infinite;
+  }
+  @keyframes beaconPulse{0%,100%{box-shadow:0 0 30px #D2FF3A,0 0 70px rgba(210,255,58,0.5),0 0 140px rgba(210,255,58,0.25)}
+  50%{box-shadow:0 0 50px #D2FF3A,0 0 110px rgba(210,255,58,0.65),0 0 200px rgba(210,255,58,0.35)}}
+  .brand-bolt{
+    width:66px;height:66px;border-radius:20px;
+    background:rgba(210,255,58,0.08);border:1px solid rgba(210,255,58,0.28);
+    display:flex;align-items:center;justify-content:center;margin-bottom:20px;
+  }
+  .brand-title{
+    font-size:108px;font-weight:900;letter-spacing:-0.045em;
+    background:linear-gradient(135deg,#fff 0%,rgba(255,255,255,0.88) 55%,rgba(210,255,58,0.65) 100%);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+    line-height:1;
+  }
+  .brand-sub{
+    font-size:19px;font-weight:500;letter-spacing:0.32em;text-transform:uppercase;
+    color:rgba(255,255,255,0.4);margin-top:16px;
+  }
+  .brand-line{width:110px;height:1px;background:linear-gradient(90deg,transparent,#D2FF3A,transparent);margin:28px auto 0}
+  .brand-tagline{font-size:14px;font-weight:400;letter-spacing:0.07em;color:rgba(255,255,255,0.24);margin-top:20px}
+
+  /* ═══ DEVICE FRAME ═══ */
+  .device{
+    position:relative;
+    width:364px;height:790px;
+    background:#080A0F;
+    border-radius:52px;
+    border:9px solid #1A1E2A;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.07),
+      0 48px 100px rgba(0,0,0,0.9),
+      0 0 60px rgba(210,255,58,0.06),
+      inset 0 1px 0 rgba(255,255,255,0.04);
+    overflow:hidden;
+    display:flex;flex-direction:column;
+    flex-shrink:0;
+  }
+  .dyn-island{
+    position:absolute;top:12px;left:50%;transform:translateX(-50%);
+    width:110px;height:30px;background:#000;border-radius:20px;z-index:50;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.6);
+  }
+  .dyn-camera{width:10px;height:10px;border-radius:50%;background:#1a1a1a;border:1px solid rgba(255,255,255,0.08)}
+  .dyn-status-dot{width:7px;height:7px;border-radius:50%}
+
+  /* ═══ APP INNER ═══ */
+  .app-scroll{flex:1;display:flex;flex-direction:column;overflow:hidden;padding-top:50px}
+  .app-header{
+    padding:10px 18px 10px;display:flex;align-items:center;justify-content:space-between;
+    border-bottom:1px solid rgba(255,255,255,0.07);flex-shrink:0;
+  }
+  .app-logo{display:flex;align-items:center;gap:10px}
+  .app-logo-icon{
+    width:36px;height:36px;border-radius:12px;background:rgba(255,255,255,0.03);
+    border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;
+    color:#D2FF3A;
+  }
+  .app-logo-text h2{font-size:18px;font-weight:900;letter-spacing:-0.03em;line-height:1}
+  .app-logo-text p{font-size:9px;text-transform:uppercase;letter-spacing:0.14em;color:rgba(255,255,255,0.38);margin-top:1px}
+  .deep-focus-pill{
+    display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:999px;
+    background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);
+    font-size:10px;font-weight:600;color:rgba(255,255,255,0.8);
+  }
+  .dfp-dot{width:6px;height:6px;border-radius:50%;background:#D2FF3A;box-shadow:0 0 6px rgba(210,255,58,0.8)}
+
+  /* Timer screen */
+  .timer-screen{flex:1;padding:12px 15px;display:flex;flex-direction:column;gap:11px;overflow:hidden}
+  .preset-pills{display:flex;gap:7px}
+  .pill{padding:7px 14px;border-radius:999px;font-size:11px;font-weight:700;cursor:default;white-space:nowrap;flex-shrink:0}
+  .pill-active{background:#D2FF3A;color:#080A0F;box-shadow:0 0 14px rgba(210,255,58,0.3)}
+  .pill-idle{background:#10131B;border:1px solid #1A1E2A;color:rgba(255,255,255,0.45)}
+
+  .consistency-card{
+    background:#10131B;border:1px solid rgba(255,255,255,0.07);border-radius:16px;
+    padding:11px 13px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
+  }
+  .cc-left{display:flex;align-items:center;gap:9px}
+  .cc-flame{
+    width:38px;height:38px;border-radius:11px;flex-shrink:0;
+    background:linear-gradient(135deg,rgba(210,255,58,0.18),rgba(16,185,129,0.08));
+    border:1px solid rgba(210,255,58,0.28);display:flex;align-items:center;justify-content:center;
+    color:#D2FF3A;
+  }
+  .cc-label{font-size:12px;font-weight:700;color:#fff}
+  .streak-badge{
+    display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:999px;
+    background:rgba(210,255,58,0.08);border:1px solid rgba(210,255,58,0.22);
+    color:#D2FF3A;font-size:9.5px;font-weight:700;margin-top:2px;
+  }
+  .cc-sub{font-size:9.5px;color:rgba(255,255,255,0.38);margin-top:1px}
+  .mini-ring{position:relative;width:40px;height:40px;flex-shrink:0}
+  .mini-ring svg{width:40px;height:40px;transform:rotate(-90deg)}
+  .mini-ring span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;font-family:'JetBrains Mono',monospace}
+
+  /* Orb zone */
+  .orb-zone{display:flex;flex-direction:column;align-items:center;position:relative;flex-shrink:0}
+  .orb-glow-bg{
+    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    width:220px;height:220px;border-radius:50%;filter:blur(55px);opacity:0.45;
+    transition:background 0.9s ease;pointer-events:none;z-index:0;
+  }
+  .orb-frame{position:relative;width:224px;height:224px;flex-shrink:0}
+  .orb-svg-ring{position:absolute;inset:0;z-index:20;pointer-events:none}
+  .orb-canvas-wrapper{
+    position:absolute;inset:12px;border-radius:50%;overflow:hidden;
+    background:#03060B;z-index:10;border:1px solid rgba(255,255,255,0.07);
+  }
+  .orb-glass{
+    position:absolute;inset:0;border-radius:50%;z-index:30;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:14px;
+    background:radial-gradient(circle at 50% 50%,rgba(6,8,14,0.72) 0%,rgba(6,8,14,0.4) 50%,transparent 78%);
+  }
+  .flow-status-pill{
+    display:flex;align-items:center;gap:5px;padding:4px 9px;border-radius:999px;
+    background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.14);
+    font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#fff;
+    margin-bottom:5px;
+  }
+  .flow-ping{width:6px;height:6px;border-radius:50%;background:#D2FF3A;animation:ping 1.4s ease-in-out infinite}
+  @keyframes ping{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.7;transform:scale(1.4)}}
+  .timer-digits{font-family:'JetBrains Mono',monospace;font-size:50px;font-weight:900;color:#fff;letter-spacing:-0.02em;line-height:1}
+  .timer-label{font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.6);margin-top:2px}
+  .audio-pill{
+    margin-top:7px;display:flex;align-items:center;gap:7px;
+    padding:4px 11px;border-radius:999px;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.13);
+  }
+  .eq-bars{display:flex;align-items:flex-end;gap:2px;height:11px}
+  .eq-bar{width:2.5px;border-radius:2px;background:#D2FF3A;transition:background 0.4s}
+  @keyframes eq1{0%,100%{height:3px}50%{height:11px}}
+  @keyframes eq2{0%,100%{height:10px}50%{height:3px}}
+  @keyframes eq3{0%,100%{height:5px}50%{height:11px}}
+  @keyframes eq4{0%,100%{height:8px}50%{height:3px}}
+  .eq-bar:nth-child(1){height:4px;animation:eq1 0.75s ease-in-out infinite}
+  .eq-bar:nth-child(2){height:10px;animation:eq2 0.85s ease-in-out infinite 0.1s}
+  .eq-bar:nth-child(3){height:6px;animation:eq3 0.65s ease-in-out infinite 0.2s}
+  .eq-bar:nth-child(4){height:8px;animation:eq4 0.9s ease-in-out infinite 0.3s}
+  .audio-label{font-size:9px;font-weight:700;color:rgba(255,255,255,0.88)}
+  .orb-switcher{
+    display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;
+    background:#0E1119;border:1px solid rgba(255,255,255,0.07);
+    font-size:9.5px;color:rgba(255,255,255,0.6);margin-top:7px;cursor:default;
+  }
+  .orb-sw-dot{width:8px;height:8px;border-radius:50%;transition:background 0.5s,box-shadow 0.5s}
+
+  /* Soundscape */
+  .soundscape-card{background:#0E1119;border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:11px 13px;flex-shrink:0}
+  .sc-header{display:flex;align-items:center;justify-content:space-between;padding-bottom:9px;border-bottom:1px solid rgba(255,255,255,0.05)}
+  .sc-track{display:flex;align-items:center;gap:8px}
+  .sc-icon{width:30px;height:30px;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+  .sc-name{font-size:11.5px;font-weight:600;color:#fff}
+  .sc-desc{font-size:9px;color:rgba(255,255,255,0.38);margin-top:1px}
+  .sc-play{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:999px;background:#181C26;border:1px solid rgba(255,255,255,0.08);font-size:9.5px;font-weight:600;color:rgba(255,255,255,0.65);flex-shrink:0}
+  .sc-chips{display:flex;gap:5px;padding-top:9px}
+  .sc-chip{padding:7px 10px;border-radius:11px;font-size:9.5px;font-weight:600;text-align:center;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:default;flex:1;transition:all 0.4s}
+  .sc-chip-active{background:rgba(210,255,58,0.1);border:1px solid rgba(210,255,58,0.28);color:#D2FF3A}
+  .sc-chip-idle{background:#181C26;border:1px solid transparent;color:rgba(255,255,255,0.4)}
+
+  /* Controls */
+  .timer-controls{display:flex;align-items:center;justify-content:center;gap:12px;flex-shrink:0}
+  .btn-secondary{width:50px;height:50px;border-radius:16px;background:#0E1119;border:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.6)}
+  .btn-cta{height:50px;padding:0 26px;border-radius:16px;background:#D2FF3A;color:#080A0F;font-size:14px;font-weight:900;display:flex;align-items:center;gap:8px;box-shadow:0 0 28px rgba(210,255,58,0.38)}
+  .play-tri{width:0;height:0;border-style:solid;border-width:7px 0 7px 11px;border-color:transparent transparent transparent #080A0F}
+
+  /* Bottom nav */
+  .app-nav{
+    display:flex;align-items:center;justify-content:space-around;
+    padding:11px 18px 18px;border-top:1px solid rgba(255,255,255,0.06);flex-shrink:0;
+    background:#080A0F;
+  }
+  .nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:default}
+  .nav-item span:first-child{font-size:21px}
+  .nav-item span:last-child{font-size:9px;font-weight:600}
+  .nav-active{color:#D2FF3A}
+  .nav-idle{color:rgba(255,255,255,0.28)}
+
+  /* ═══ DAILY SCREEN ═══ */
+  .daily-screen{flex:1;padding:12px 14px;display:flex;flex-direction:column;gap:10px;overflow:hidden}
+  .greeting-row{display:flex;align-items:flex-end;justify-content:space-between;flex-shrink:0}
+  .date-label{display:flex;align-items:center;gap:5px;font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.38);margin-bottom:2px}
+  .date-dot{width:5px;height:5px;border-radius:50%;background:#D2FF3A}
+  .greeting{font-size:22px;font-weight:900;letter-spacing:-0.03em}
+  .level-block{text-align:right;flex-shrink:0}
+  .level-text{font-size:9.5px;font-weight:700;color:#D2FF3A}
+  .level-bar{width:68px;height:4px;background:#181C26;border-radius:2px;margin-top:4px;overflow:hidden}
+  .level-fill{height:100%;background:#D2FF3A;border-radius:2px;width:72%}
+  .cal-strip{display:flex;gap:5px}
+  .cal-day{display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 7px;border-radius:11px;flex:1;cursor:default}
+  .cal-day-name{font-size:8.5px;font-weight:600;text-transform:uppercase;color:rgba(255,255,255,0.3)}
+  .cal-day-num{font-size:13px;font-weight:900}
+  .cal-dot{width:4px;height:4px;border-radius:50%}
+  .cal-active{background:#D2FF3A}
+  .cal-active .cal-day-name,.cal-active .cal-day-num{color:#080A0F}
+  .cal-active .cal-dot{background:#080A0F}
+  .cal-idle .cal-day-num{color:rgba(255,255,255,0.65)}
+  .cal-idle .cal-dot{background:rgba(255,255,255,0.28)}
+  .cog-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+  .cog-label{font-size:11px;font-weight:600;color:rgba(255,255,255,0.38)}
+  .in-flow-badge{font-size:8.5px;font-weight:900;text-transform:uppercase;letter-spacing:0.07em;padding:3px 8px;border-radius:6px;background:rgba(210,255,58,0.12);border:1px solid rgba(210,255,58,0.28);color:#D2FF3A}
+  .cog-states{display:flex;gap:4px;background:#0E1119;border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:7px}
+  .cog-state{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 4px;border-radius:11px;flex:1;cursor:default;font-size:8px;font-weight:600}
+  .cog-state-active{background:rgba(210,255,58,0.12);border:1px solid rgba(210,255,58,0.3);color:#D2FF3A}
+  .cog-state-idle{color:rgba(255,255,255,0.3)}
+  .cog-icon{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px}
+  .cog-icon-active{background:#D2FF3A;color:#080A0F}
+  .cog-icon-idle{background:#181C26;border:1px solid rgba(255,255,255,0.05)}
+  .strategy-box{display:flex;align-items:center;gap:7px;padding:7px 10px;border-radius:11px;background:rgba(14,17,25,0.7);border:1px solid rgba(255,255,255,0.06);font-size:9.5px;color:rgba(255,255,255,0.7);line-height:1.3}
+  .trackers-label{font-size:11.5px;font-weight:700;color:#fff;margin-bottom:5px;display:flex;justify-content:space-between;align-items:center}
+  .trackers-label span:last-child{font-size:9px;font-weight:400;color:rgba(255,255,255,0.3)}
+  .trackers-row{display:flex;gap:7px}
+  .tracker-card{flex:1;min-width:0;background:#0E1119;border:1px solid rgba(255,255,255,0.07);border-radius:18px;padding:11px 9px;display:flex;flex-direction:column;align-items:center}
+  .tracker-title{display:flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;width:100%;margin-bottom:5px}
+  .tracker-ring-wrap{position:relative;width:72px;height:72px}
+  .tracker-ring-wrap svg{width:72px;height:72px;transform:rotate(-90deg)}
+  .tracker-ring-val{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .tracker-val{font-size:13px;font-weight:900;font-family:'JetBrains Mono',monospace}
+  .tracker-unit{font-size:8.5px;color:rgba(255,255,255,0.38);font-weight:500}
+  .tracker-sub{font-size:8.5px;color:rgba(255,255,255,0.3);margin-top:3px;text-align:center;line-height:1.3}
+  .tracker-btn{font-size:9.5px;font-weight:600;padding:4px 0;border-radius:9px;width:100%;text-align:center;margin-top:5px}
+  .tracker-btn-lime{background:rgba(210,255,58,0.07);color:#D2FF3A;border:1px solid rgba(210,255,58,0.18)}
+  .tracker-btn-purple{background:rgba(168,85,247,0.07);color:#A855F7;border:1px solid rgba(168,85,247,0.18)}
+
+  /* ═══ INSIGHTS SCREEN ═══ */
+  .insights-screen{flex:1;padding:12px 14px;display:flex;flex-direction:column;gap:10px;overflow:hidden}
+  .ins-label{font-size:11.5px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:5px}
+  .streak-ins{display:flex;align-items:center;gap:4px;font-size:8.5px;font-weight:700;padding:2px 7px;border-radius:999px;background:rgba(210,255,58,0.08);border:1px solid rgba(210,255,58,0.22);color:#D2FF3A}
+  .week-cal{display:flex;gap:4px}
+  .wc-day{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;padding:4px 2px;border-radius:9px}
+  .wc-dn{font-size:8px;font-weight:600;text-transform:uppercase;color:rgba(255,255,255,0.28)}
+  .wc-num{font-size:12px;font-weight:800}
+  .wc-check{width:21px;height:21px;border-radius:50%;background:#D2FF3A;display:flex;align-items:center;justify-content:center;font-size:10px;color:#080A0F;font-weight:900}
+  .wc-active{background:rgba(210,255,58,0.07);border:1px solid rgba(210,255,58,0.28)}
+  .wc-active .wc-dn,.wc-active .wc-num{color:#D2FF3A}
+  .wc-idle .wc-num{color:rgba(255,255,255,0.65)}
+  .wc-time{font-size:8.5px;color:rgba(255,255,255,0.28)}
+  .sd-card{background:#0E1119;border:1px solid rgba(255,255,255,0.07);border-radius:13px;padding:9px 11px;display:flex;justify-content:space-between;align-items:center}
+  .sd-label{font-size:9px;font-weight:600;color:rgba(255,255,255,0.38);margin-bottom:3px}
+  .sd-val{font-size:12px;font-weight:800;color:#D2FF3A}
+  .sd-sub{font-size:8.5px;color:rgba(255,255,255,0.38);margin-top:1px}
+  .active-today{font-size:8.5px;font-weight:700;padding:3px 9px;border-radius:7px;background:rgba(210,255,58,0.1);border:1px solid rgba(210,255,58,0.22);color:#D2FF3A;white-space:nowrap}
+  .flow-block{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;background:#0E1119;border:1px solid rgba(255,255,255,0.06);border-radius:13px}
+  .fb-left{display:flex;align-items:center;gap:9px}
+  .fb-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+  .fb-name{font-size:11px;font-weight:700;color:#fff}
+  .fb-meta{font-size:9px;color:rgba(255,255,255,0.38);margin-top:1px}
+  .fb-badge{font-size:9.5px;font-weight:700;padding:3px 9px;border-radius:999px;background:rgba(210,255,58,0.08);border:1px solid rgba(210,255,58,0.22);color:#D2FF3A;white-space:nowrap}
+  .big-ring-card{background:#0E1119;border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:14px;display:flex;flex-direction:column;align-items:center;flex-shrink:0}
+  .big-ring-wrap{position:relative;width:116px;height:116px}
+  .big-ring-wrap svg{width:116px;height:116px;transform:rotate(-90deg)}
+  .big-ring-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+  .big-ring-val{font-size:21px;font-weight:900;font-family:'JetBrains Mono',monospace;color:#fff;line-height:1}
+  .big-ring-sub{font-size:8.5px;color:#D2FF3A;font-weight:700;margin-top:2px}
+  .big-ring-stats{display:flex;gap:22px;margin-top:9px}
+  .brs-item{display:flex;flex-direction:column;align-items:center;gap:1px}
+  .brs-label{font-size:8.5px;color:rgba(255,255,255,0.38);font-weight:500}
+  .brs-val{font-size:14px;font-weight:900;color:#fff}
+  .brs-val-lime{color:#D2FF3A}
+
+  /* Task list */
+  .task-card-wrap{padding:10px 11px;border-radius:13px;background:#0E1119;border:1px solid rgba(255,255,255,0.06)}
+  .task-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:7px}
+  .task-title{font-size:12px;font-weight:800;color:#fff}
+  .add-task-btn{font-size:9px;font-weight:700;padding:4px 10px;border-radius:999px;background:#D2FF3A;color:#080A0F;white-space:nowrap;flex-shrink:0;box-shadow:0 0 10px rgba(210,255,58,0.25)}
+  .task-item{display:flex;align-items:flex-start;gap:9px;padding:7px 9px;border-radius:11px;background:rgba(0,0,0,0.3);margin-bottom:5px}
+  .task-check{width:17px;height:17px;border-radius:50%;border:2px solid rgba(255,255,255,0.18);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:8.5px;margin-top:1px}
+  .task-check-done{background:#D2FF3A;border-color:#D2FF3A;color:#080A0F;font-weight:900}
+  .task-info{flex:1;min-width:0}
+  .task-name{font-size:11px;font-weight:700;color:#fff}
+  .task-name-done{text-decoration:line-through;color:rgba(255,255,255,0.28)}
+  .task-meta{font-size:8.5px;color:rgba(255,255,255,0.38);margin-top:1px}
+  .task-tag{display:flex;align-items:center;gap:4px;flex-wrap:nowrap;margin-bottom:2px}
+  .tag{padding:2px 6px;border-radius:4px;font-size:8px;font-weight:700;text-transform:uppercase}
+  .tag-green{background:rgba(210,255,58,0.1);color:#D2FF3A}
+  .tag-purple{background:rgba(167,139,250,0.1);color:#A78BFA}
+  .tag-blue{background:rgba(96,165,250,0.1);color:#60A5FA}
+  .status-green{display:flex;align-items:center;gap:3px;font-size:8px;font-weight:700;color:#D2FF3A}
+  .status-green::before{content:'';width:4px;height:4px;border-radius:50%;background:#D2FF3A;display:inline-block}
+
+  /* ═══ SCENE 3: ORB HERO ═══ */
+  #scene-3-inner{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:60px;padding:0 60px}
+
+  /* ═══ CINEMATIC COPY PANELS ═══ */
+  .copy-panel{display:flex;flex-direction:column;gap:18px;max-width:440px;flex-shrink:0}
+  .copy-eyebrow{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.22em;color:#D2FF3A}
+  .copy-title{font-size:50px;font-weight:900;letter-spacing:-0.045em;line-height:1.02;color:#fff}
+  .copy-title span{color:#D2FF3A}
+  .copy-body{font-size:16px;line-height:1.65;color:rgba(255,255,255,0.45);max-width:390px}
+  .copy-bullets{display:flex;flex-direction:column;gap:9px}
+  .copy-bullet{display:flex;align-items:center;gap:11px;font-size:13px;color:rgba(255,255,255,0.6)}
+  .bullet-dot{width:6px;height:6px;border-radius:50%;background:#D2FF3A;flex-shrink:0}
+
+  /* ═══ CAPTION BAR ═══ */
+  .caption-bar{
+    position:absolute;bottom:52px;left:50%;transform:translateX(-50%);
+    display:flex;flex-direction:column;align-items:center;gap:5px;z-index:50;white-space:nowrap;
+  }
+  .caption-eyebrow{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.22em;color:rgba(255,255,255,0.3)}
+  .caption-title{font-size:18px;font-weight:800;letter-spacing:-0.02em;color:rgba(255,255,255,0.75)}
+  .caption-sep{width:40px;height:1px;background:linear-gradient(90deg,transparent,rgba(210,255,58,0.6),transparent);margin:2px auto}
+
+  /* ═══ SCENE 7: FINALE ═══ */
+  #scene-7{display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .finale-wrap{display:flex;flex-direction:column;align-items:center;gap:0}
+  .finale-brand{font-size:92px;font-weight:900;letter-spacing:-0.045em;line-height:1;
+    background:linear-gradient(135deg,#fff 0%,rgba(255,255,255,0.88) 55%,rgba(210,255,58,0.65) 100%);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .finale-tagline{font-size:19px;font-weight:500;letter-spacing:0.3em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-top:16px}
+  .finale-motto{font-size:15px;color:rgba(255,255,255,0.28);margin-top:30px;letter-spacing:0.04em;font-style:italic}
+  .finale-line{width:1px;height:56px;background:linear-gradient(to bottom,transparent,rgba(210,255,58,0.6),transparent);margin:28px auto}
+  .finale-url{font-size:12px;font-weight:600;color:rgba(210,255,58,0.55);letter-spacing:0.1em;font-family:'JetBrains Mono',monospace}
+  .finale-dot{width:12px;height:12px;border-radius:50%;background:#D2FF3A;box-shadow:0 0 40px #D2FF3A,0 0 90px rgba(210,255,58,0.5);margin:0 auto 32px}
+
+  /* ═══ REPLAYABLE KEYFRAME ANIMATIONS ═══ */
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  @keyframes fadeInUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes slideInLeft{from{opacity:0;transform:translateX(50px)}to{opacity:1;transform:translateX(0)}}
+  @keyframes slideInRight{from{opacity:0;transform:translateX(-50px)}to{opacity:1;transform:translateX(0)}}
+  @keyframes scaleIn{from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)}}
+  @keyframes subtleFloat{0%,100%{transform:translateY(0) perspective(1800px) rotateY(4deg)}50%{transform:translateY(-7px) perspective(1800px) rotateY(4deg)}}
+  @keyframes subtleFloatR{0%,100%{transform:translateY(0) perspective(1800px) rotateY(-4deg)}50%{transform:translateY(-6px) perspective(1800px) rotateY(-4deg)}}
+  @keyframes textReveal{from{opacity:0;letter-spacing:0.5em}to{opacity:1;letter-spacing:-0.045em}}
+  @keyframes subtleReveal{from{opacity:0;letter-spacing:0.5em}to{opacity:1;letter-spacing:0.3em}}
+  @keyframes fadeDelay{from{opacity:0}to{opacity:1}}
+
+  /* Trigger animations ONLY when parent scene has .active */
+  .scene.active .anim-left { animation: slideInLeft 0.75s cubic-bezier(0.16,1,0.3,1) forwards; }
+  .scene:not(.active) .anim-left { opacity: 0; transform: translateX(50px); animation: none; }
+
+  .scene.active .anim-right { animation: slideInRight 0.75s cubic-bezier(0.16,1,0.3,1) forwards; }
+  .scene:not(.active) .anim-right { opacity: 0; transform: translateX(-50px); animation: none; }
+
+  .scene.active .anim-fadeup { animation: fadeInUp 0.8s cubic-bezier(0.16,1,0.3,1) forwards; }
+  .scene:not(.active) .anim-fadeup { opacity: 0; transform: translateY(28px); animation: none; }
+
+  .scene.active .anim-scale { animation: scaleIn 0.8s cubic-bezier(0.16,1,0.3,1) forwards; }
+  .scene:not(.active) .anim-scale { opacity: 0; transform: scale(0.92); animation: none; }
+
+  .scene.active .text-reveal { animation: textReveal 1.4s cubic-bezier(0.16,1,0.3,1) forwards; }
+  .scene:not(.active) .text-reveal { opacity: 0; letter-spacing: 0.5em; animation: none; }
+
+  .scene.active .text-reveal-sub { animation: subtleReveal 1.2s cubic-bezier(0.16,1,0.3,1) 0.35s forwards; }
+  .scene:not(.active) .text-reveal-sub { opacity: 0; letter-spacing: 0.5em; animation: none; }
+
+  .scene.active .fd1 { animation: fadeDelay 0.7s ease 0.25s forwards; }
+  .scene:not(.active) .fd1 { opacity: 0; animation: none; }
+
+  .scene.active .fd2 { animation: fadeDelay 0.7s ease 0.55s forwards; }
+  .scene:not(.active) .fd2 { opacity: 0; animation: none; }
+
+  .scene.active .fd3 { animation: fadeDelay 0.7s ease 0.85s forwards; }
+  .scene:not(.active) .fd3 { opacity: 0; animation: none; }
+
+  .scene.active .fd4 { animation: fadeDelay 0.7s ease 1.15s forwards; }
+  .scene:not(.active) .fd4 { opacity: 0; animation: none; }
+
+  .float-l{animation:subtleFloat 4.5s ease-in-out infinite}
+  .float-r{animation:subtleFloatR 4.5s ease-in-out 1.2s infinite}
+  .d1{animation-delay:0.15s}
+  .d2{animation-delay:0.35s}
+  .d3{animation-delay:0.55s}
+  .d4{animation-delay:0.75s}
+</style>
+</head>
+<body>
+
+<div id="stage-wrapper">
+  <div id="stage">
+    <!-- Layered cinematic background -->
+    <canvas id="bg-canvas"></canvas>
+    <div class="cine-grid"></div>
+    <div class="vignette"></div>
+    <div class="scanlines"></div>
+    <div class="accent-line-top"></div>
+    <div class="accent-line-bottom"></div>
+
+    <!-- =====================================================================
+         SCENE 1: BRAND OPENING
+         ===================================================================== -->
+    <div class="scene active" id="scene-1">
+      <div class="brand-beacon fd1"></div>
+      <div class="brand-bolt fd2">
+        <span class="material-symbols-outlined" style="font-size:36px;color:#D2FF3A;font-variation-settings:'FILL' 1">bolt</span>
+      </div>
+      <h1 class="brand-title text-reveal">FOCUSDOT</h1>
+      <p class="brand-sub text-reveal-sub">Deep Flow Mode</p>
+      <div class="brand-line fd3"></div>
+      <p class="brand-tagline fd4">Your attention is your greatest asset.</p>
+    </div>
+
+    <!-- =====================================================================
+         SCENE 2: APP REVEAL — Timer screen in device + copy
+         ===================================================================== -->
+    <div class="scene" id="scene-2">
+      <div style="position:absolute;inset:0;display:flex;align-items:center;gap:0">
+        <!-- Left: device -->
+        <div style="flex:0 0 44%;display:flex;align-items:center;justify-content:flex-end;padding-right:48px">
+          <div class="device float-l" id="device-timer">
+            <div class="dyn-island">
+              <div class="dyn-camera"></div>
+              <div class="dyn-status-dot" style="background:#D2FF3A;box-shadow:0 0 8px #D2FF3A"></div>
+            </div>
+            <div class="app-scroll">
+              <div class="app-header">
+                <div class="app-logo">
+                  <div class="app-logo-icon"><span class="material-symbols-outlined" style="font-size:19px;font-variation-settings:'FILL' 1">bolt</span></div>
+                  <div class="app-logo-text"><h2>FocusDot</h2><p>Deep Flow Mode</p></div>
+                </div>
+                <div class="deep-focus-pill"><div class="dfp-dot"></div>Deep Focus</div>
+              </div>
+              <div class="timer-screen">
+                <!-- Presets -->
+                <div class="preset-pills">
+                  <div class="pill pill-active">25m Pomodoro</div>
+                  <div class="pill pill-idle">30m Deep Work</div>
+                  <div class="pill pill-idle">45m Exam Prep</div>
+                </div>
+                <!-- Consistency -->
+                <div class="consistency-card">
+                  <div class="cc-left">
+                    <div class="cc-flame"><span class="material-symbols-outlined" style="font-size:19px;font-variation-settings:'FILL' 1">local_fire_department</span></div>
+                    <div>
+                      <div class="cc-label">Daily Consistency <span class="streak-badge"><span class="material-symbols-outlined" style="font-size:10px">local_fire_department</span>14-Day Streak</span></div>
+                      <div class="cc-sub">3 of 4 Sessions Completed</div>
+                    </div>
+                  </div>
+                  <div class="mini-ring">
+                    <svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="15" stroke="#1E2330" stroke-width="3.5" fill="none"/><circle cx="20" cy="20" r="15" id="ring-con" stroke="#D2FF3A" stroke-width="3.5" stroke-linecap="round" fill="none" stroke-dasharray="94.25" stroke-dashoffset="23.56" style="filter:drop-shadow(0 0 5px rgba(210,255,58,0.6))"/></svg>
+                    <span style="font-size:9px;font-weight:900;font-family:'JetBrains Mono',monospace">3/4</span>
+                  </div>
+                </div>
+                <!-- Orb -->
+                <div class="orb-zone">
+                  <div class="orb-glow-bg" id="orb-glow-bg" style="background:radial-gradient(circle,rgba(210,255,58,0.3),rgba(16,185,129,0.15),transparent)"></div>
+                  <div class="orb-frame">
+                    <svg class="orb-svg-ring" viewBox="0 0 224 224">
+                      <defs>
+                        <linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop id="rg1" offset="0%" stop-color="#E4FF70"/>
+                          <stop id="rg2" offset="60%" stop-color="#D2FF3A"/>
+                          <stop id="rg3" offset="100%" stop-color="#10B981"/>
+                        </linearGradient>
+                        <filter id="gf"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                      </defs>
+                      <circle cx="112" cy="112" r="104" stroke="#181C26" stroke-opacity="0.8" stroke-width="6" fill="none"/>
+                      <circle id="timer-ring-svg" cx="112" cy="112" r="104" stroke="url(#rg)" stroke-width="6" stroke-linecap="round" fill="none" stroke-dasharray="653.5" stroke-dashoffset="100" filter="url(#gf)" style="transform:rotate(-90deg);transform-origin:112px 112px"/>
+                    </svg>
+                    <div class="orb-canvas-wrapper">
+                      <canvas id="orb-canvas" width="400" height="400" style="width:100%;height:100%;display:block;border-radius:50%"></canvas>
+                    </div>
+                    <div class="orb-glass">
+                      <div class="flow-status-pill"><div class="flow-ping" id="fp-dot"></div><span>Flow Ready</span></div>
+                      <div class="timer-digits font-mono" id="timer-display">25:00</div>
+                      <div class="timer-label">Pomodoro Focus</div>
+                      <div class="audio-pill">
+                        <div class="eq-bars"><div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div></div>
+                        <span class="audio-label" id="audio-track-name">40Hz Gamma</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="orb-switcher">
+                    <div class="orb-sw-dot" id="orb-sw-dot" style="background:linear-gradient(135deg,#D2FF3A,#10B981);box-shadow:0 0 8px rgba(210,255,58,0.5)"></div>
+                    <span id="orb-sw-label">Focus Sphere: Bioluminescent Flow</span>
+                    <span style="font-size:12px;opacity:0.5">⇄</span>
+                  </div>
+                </div>
+                <!-- Soundscape -->
+                <div class="soundscape-card">
+                  <div class="sc-header">
+                    <div class="sc-track">
+                      <div class="sc-icon" id="sc-icon">🧠</div>
+                      <div>
+                        <div class="sc-name" id="sc-name">Binaural Beats (40Hz)</div>
+                        <div class="sc-desc" id="sc-desc">Gamma wave focus • 40Hz acoustic synchronization</div>
+                      </div>
+                    </div>
+                    <div class="sc-play"><span style="font-size:11px">🔊</span>Play</div>
+                  </div>
+                  <div class="sc-chips">
+                    <div class="sc-chip sc-chip-active" id="chip-0"><span>🧠</span><span>40Hz Beat</span></div>
+                    <div class="sc-chip sc-chip-idle" id="chip-1"><span>🌧️</span><span>Rain Calm</span></div>
+                    <div class="sc-chip sc-chip-idle" id="chip-2"><span>☕</span><span>Lo-Fi Cafe</span></div>
+                    <div class="sc-chip sc-chip-idle" id="chip-3"><span>🌌</span><span>Deep Drone</span></div>
+                  </div>
+                </div>
+                <!-- Controls -->
+                <div class="timer-controls">
+                  <div class="btn-secondary"><span class="material-symbols-outlined" style="font-size:21px">refresh</span></div>
+                  <div class="btn-cta"><div class="play-tri"></div><span>Start Flow</span></div>
+                  <div class="btn-secondary" style="font-size:11px;font-weight:800">+5m</div>
+                </div>
+              </div>
+              <!-- Nav -->
+              <div class="app-nav">
+                <div class="nav-item nav-active"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">timer</span><span>Timer</span></div>
+                <div class="nav-item nav-idle"><span class="material-symbols-outlined">calendar_today</span><span>Daily</span></div>
+                <div class="nav-item nav-idle"><span class="material-symbols-outlined">bar_chart</span><span>Insights</span></div>
+                <div class="nav-item nav-idle"><span class="material-symbols-outlined">settings</span><span>Settings</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Right: copy -->
+        <div style="flex:1;padding-left:52px;padding-right:80px">
+          <div class="copy-panel">
+            <p class="copy-eyebrow anim-left d1">The Focus Timer</p>
+            <h2 class="copy-title anim-left d2">Raymarched<br>Cosmic Orb.</h2>
+            <p class="copy-body anim-left d3">A live WebGL particle nebula that shifts with your session intensity. Five chromatic themes. One focus.</p>
+            <div class="copy-bullets anim-left d4">
+              <div class="copy-bullet"><div class="bullet-dot"></div><span>25m Pomodoro / 30m Deep Work / 45m Exam Prep</span></div>
+              <div class="copy-bullet"><div class="bullet-dot"></div><span>40Hz Binaural Beats • Rain Calm • Lo-Fi Cafe • Deep Drone</span></div>
+              <div class="copy-bullet"><div class="bullet-dot"></div><span>14-Day Consistency Streak • 94% Deep Flow Rate</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="caption-bar">
+        <div class="caption-sep"></div>
+        <span class="caption-eyebrow">FocusDot — Timer</span>
+        <span class="caption-title">The Cosmic Orb. 5 Themes. Zero Distractions.</span>
+      </div>
+    </div>
+
+    <!-- =====================================================================
+         SCENE 3: ORB CLOSE-UP — Large orb hero + theme cycling
+         ===================================================================== -->
+    <div class="scene" id="scene-3">
+      <div id="scene-3-inner">
+        <!-- Large orb hero -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:0;flex-shrink:0">
+          <div style="position:relative">
+            <div id="scene3-glow" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:440px;height:440px;border-radius:50%;filter:blur(90px);opacity:0.45;background:radial-gradient(circle,rgba(210,255,58,0.4),transparent);transition:background 0.9s ease;pointer-events:none"></div>
+            <div style="position:relative;width:380px;height:380px">
+              <svg style="position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)" viewBox="0 0 380 380">
+                <circle cx="190" cy="190" r="175" stroke="#181C26" stroke-width="8" fill="none"/>
+                <circle id="scene3-ring" cx="190" cy="190" r="175" stroke="#D2FF3A" stroke-width="8" stroke-linecap="round" fill="none" stroke-dasharray="1099.6" stroke-dashoffset="160" style="filter:drop-shadow(0 0 14px rgba(210,255,58,0.7));transition:stroke 0.9s ease"/>
+              </svg>
+              <div style="position:absolute;inset:17px;border-radius:50%;overflow:hidden;background:#04060B;border:1px solid rgba(255,255,255,0.07)">
+                <canvas id="orb-canvas-3" width="700" height="700" style="width:100%;height:100%;display:block;border-radius:50%"></canvas>
+              </div>
+              <!-- Orb glass overlay -->
+              <div style="position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 50% 50%,rgba(6,8,14,0.72) 0%,rgba(6,8,14,0.4) 50%,transparent 78%);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:28px">
+                <div style="display:flex;align-items:center;gap:5px;padding:5px 14px;border-radius:999px;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.14);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:9px">
+                  <div style="width:7px;height:7px;border-radius:50%;background:#D2FF3A;animation:ping 1.4s ease-in-out infinite" id="s3-pill-dot"></div>
+                  <span>Flow Ready</span>
+                </div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:80px;font-weight:900;color:#fff;letter-spacing:-0.02em;line-height:1" id="s3-timer">25:00</div>
+                <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.6);margin-top:5px" id="s3-label">Pomodoro Focus</div>
+                <div style="margin-top:12px;display:flex;align-items:center;gap:9px;padding:6px 15px;border-radius:999px;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.14)">
+                  <div class="eq-bars"><div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div></div>
+                  <span style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.88)" id="s3-audio">40Hz Gamma</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Theme carousel pills -->
+          <div style="display:flex;align-items:center;gap:8px;margin-top:28px">
+            <div id="tc-0" style="display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:999px;background:rgba(210,255,58,0.1);border:1px solid rgba(210,255,58,0.3);font-size:10.5px;font-weight:700;color:#D2FF3A;transition:all 0.5s ease"><div style="width:7px;height:7px;border-radius:50%;background:#D2FF3A"></div>Bioluminescent</div>
+            <div id="tc-1" style="display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:999px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);font-size:10.5px;font-weight:600;color:rgba(255,255,255,0.4);transition:all 0.5s ease"><div style="width:7px;height:7px;border-radius:50%;background:#10B981"></div>Emerald Focus</div>
+            <div id="tc-2" style="display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:999px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);font-size:10.5px;font-weight:600;color:rgba(255,255,255,0.4);transition:all 0.5s ease"><div style="width:7px;height:7px;border-radius:50%;background:#00F5FF"></div>Cyber Aurora</div>
+            <div id="tc-3" style="display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:999px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);font-size:10.5px;font-weight:600;color:rgba(255,255,255,0.4);transition:all 0.5s ease"><div style="width:7px;height:7px;border-radius:50%;background:#FF2A55"></div>Crimson Flare</div>
+            <div id="tc-4" style="display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:999px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);font-size:10.5px;font-weight:600;color:rgba(255,255,255,0.4);transition:all 0.5s ease"><div style="width:7px;height:7px;border-radius:50%;background:#A855F7"></div>Cosmic Amethyst</div>
+          </div>
+          <!-- Orb name label -->
+          <div style="margin-top:12px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.4);letter-spacing:0.04em">
+            <span id="s3-orb-name">Focus Sphere: Bioluminescent Flow</span> <span style="opacity:0.5">⇄</span>
+          </div>
+        </div>
+
+        <!-- Right: copy -->
+        <div class="copy-panel">
+          <p class="copy-eyebrow anim-left d1">5 Dynamic Themes</p>
+          <h2 class="copy-title anim-left d2">Every session<br>feels <span>different.</span></h2>
+          <p class="copy-body anim-left d3">Switch between five custom WebGL raymarched particle spheres. Each theme transforms the entire focus atmosphere in real time.</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" class="anim-left d4">
+            <div style="padding:11px 13px;border-radius:13px;background:#0E1119;border:1px solid rgba(255,255,255,0.07)">
+              <div style="font-size:17px;margin-bottom:4px">🧠</div>
+              <div style="font-size:11px;font-weight:700;color:#fff">Binaural Beats</div>
+              <div style="font-size:9px;color:rgba(255,255,255,0.4);margin-top:1px">40Hz Gamma sync</div>
+            </div>
+            <div style="padding:11px 13px;border-radius:13px;background:#0E1119;border:1px solid rgba(255,255,255,0.07)">
+              <div style="font-size:17px;margin-bottom:4px">🌧️</div>
+              <div style="font-size:11px;font-weight:700;color:#fff">Rain Calm</div>
+              <div style="font-size:9px;color:rgba(255,255,255,0.4);margin-top:1px">Gentle downpour</div>
+            </div>
+            <div style="padding:11px 13px;border-radius:13px;background:#0E1119;border:1px solid rgba(255,255,255,0.07)">
+              <div style="font-size:17px;margin-bottom:4px">☕</div>
+              <div style="font-size:11px;font-weight:700;color:#fff">Lo-Fi Cafe</div>
+              <div style="font-size:9px;color:rgba(255,255,255,0.4);margin-top:1px">Ambient chatter</div>
+            </div>
+            <div style="padding:11px 13px;border-radius:13px;background:#0E1119;border:1px solid rgba(255,255,255,0.07)">
+              <div style="font-size:17px;margin-bottom:4px">🌌</div>
+              <div style="font-size:11px;font-weight:700;color:#fff">Deep Drone</div>
+              <div style="font-size:9px;color:rgba(255,255,255,0.4);margin-top:1px">Sub-harmonic resonance</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="caption-bar">
+        <div class="caption-sep"></div>
+        <span class="caption-eyebrow">FocusDot — Themes</span>
+        <span class="caption-title">WebGL Raymarched. 5 Chromatic Worlds.</span>
+      </div>
+    </div>
+
+    <!-- =====================================================================
+         SCENE 4: DAILY & COGNITIVE STATE
+         ===================================================================== -->
+    <div class="scene" id="scene-4">
+      <div style="position:absolute;inset:0;display:flex;align-items:center;gap:0">
+        <div style="flex:0 0 44%;display:flex;align-items:center;justify-content:flex-end;padding-right:48px">
+          <div class="device float-r">
+            <div class="dyn-island">
+              <div class="dyn-camera"></div>
+              <div class="dyn-status-dot" style="background:#D2FF3A;box-shadow:0 0 8px #D2FF3A"></div>
+            </div>
+            <div class="app-scroll">
+              <div class="app-header">
+                <div class="app-logo">
+                  <div class="app-logo-icon"><span class="material-symbols-outlined" style="font-size:19px;font-variation-settings:'FILL' 1">bolt</span></div>
+                  <div class="app-logo-text"><h2>FocusDot</h2><p>Deep Flow Mode</p></div>
+                </div>
+                <div class="deep-focus-pill"><div class="dfp-dot"></div>Deep Focus</div>
+              </div>
+              <div class="daily-screen">
+                <div class="greeting-row">
+                  <div>
+                    <div class="date-label"><div class="date-dot"></div>Friday, Oct 24</div>
+                    <div class="greeting">Howdy, Swati!</div>
+                  </div>
+                  <div class="level-block">
+                    <div class="level-text">Level 8 Flow</div>
+                    <div class="level-bar"><div class="level-fill"></div></div>
+                  </div>
+                </div>
+                <!-- Calendar -->
+                <div>
+                  <div style="font-size:11.5px;font-weight:700;color:#fff;margin-bottom:5px">Weekly Focus Schedule</div>
+                  <div class="cal-strip">
+                    <div class="cal-day cal-idle"><span class="cal-day-name">Wed</span><span class="cal-day-num" style="color:rgba(255,255,255,0.55)">21</span><div class="cal-dot" style="background:rgba(210,255,58,0.5)"></div></div>
+                    <div class="cal-day cal-idle"><span class="cal-day-name">Thu</span><span class="cal-day-num" style="color:rgba(255,255,255,0.55)">22</span><div class="cal-dot" style="background:rgba(210,255,58,0.5)"></div></div>
+                    <div class="cal-day cal-idle"><span class="cal-day-name">Fri</span><span class="cal-day-num" style="color:rgba(255,255,255,0.55)">23</span><div class="cal-dot" style="background:rgba(210,255,58,0.4)"></div></div>
+                    <div class="cal-day cal-idle"><span class="cal-day-name">Sat</span><span class="cal-day-num" style="color:rgba(255,255,255,0.55)">24</span><div class="cal-dot" style="background:rgba(210,255,58,0.3)"></div></div>
+                    <div class="cal-day cal-active"><span class="cal-day-name">Sun</span><span class="cal-day-num">25</span><div class="cal-dot"></div></div>
+                    <div class="cal-day cal-idle"><span class="cal-day-name">Mon</span><span class="cal-day-num" style="color:rgba(255,255,255,0.35)">26</span><div class="cal-dot" style="background:rgba(255,255,255,0.14)"></div></div>
+                    <div class="cal-day cal-idle"><span class="cal-day-name">Tue</span><span class="cal-day-num" style="color:rgba(255,255,255,0.35)">27</span><div class="cal-dot" style="background:rgba(255,255,255,0.14)"></div></div>
+                  </div>
+                </div>
+                <!-- Cognitive states -->
+                <div>
+                  <div class="cog-row">
+                    <span class="cog-label">Cognitive Focus State</span>
+                    <div class="in-flow-badge">IN FLOW</div>
+                  </div>
+                  <div class="cog-states">
+                    <div class="cog-state cog-state-idle"><div class="cog-icon cog-icon-idle">🌙</div>Brain Fog</div>
+                    <div class="cog-state cog-state-idle"><div class="cog-icon cog-icon-idle">🌊</div>Restless</div>
+                    <div class="cog-state cog-state-idle"><div class="cog-icon cog-icon-idle">🧘</div>Balanced</div>
+                    <div class="cog-state cog-state-active"><div class="cog-icon cog-icon-active">⚡</div>In Flow</div>
+                    <div class="cog-state cog-state-idle"><div class="cog-icon cog-icon-idle" style="color:rgba(167,139,250,0.8)">⚡</div>Peak</div>
+                  </div>
+                  <div class="strategy-box" style="margin-top:7px">
+                    <span class="material-symbols-outlined" style="font-size:13px;color:#D2FF3A;flex-shrink:0">tips_and_updates</span>
+                    Laser locked in • Peak cognitive clarity for deep problem solving
+                  </div>
+                </div>
+                <!-- Trackers -->
+                <div>
+                  <div class="trackers-label">Active Trackers <span>Swipe • 4 Trackers Active</span></div>
+                  <div class="trackers-row">
+                    <div class="tracker-card">
+                      <div class="tracker-title">🌙 Sleep Target</div>
+                      <div class="tracker-ring-wrap">
+                        <svg viewBox="0 0 72 72"><circle cx="36" cy="36" r="28" stroke="#1C273E" stroke-width="7" fill="none"/><circle cx="36" cy="36" r="28" stroke="#D2FF3A" stroke-dasharray="175.9" stroke-dashoffset="44" stroke-linecap="round" stroke-width="7" fill="none" style="filter:drop-shadow(0 0 5px rgba(210,255,58,0.5))"/></svg>
+                        <div class="tracker-ring-val">
+                          <span class="tracker-val" style="font-size:12px">6.5<span style="font-size:8.5px;color:rgba(255,255,255,0.4)">/8</span></span>
+                          <span class="tracker-unit">hours</span>
+                        </div>
+                      </div>
+                      <div class="tracker-sub">6h 30m of 8h goal</div>
+                      <div class="tracker-btn tracker-btn-lime">±0.5h</div>
+                    </div>
+                    <div class="tracker-card">
+                      <div class="tracker-title">💧 Hydration</div>
+                      <div class="tracker-ring-wrap">
+                        <svg viewBox="0 0 72 72"><circle cx="36" cy="36" r="28" stroke="#1C273E" stroke-width="7" fill="none"/><circle cx="36" cy="36" r="28" stroke="#A855F7" stroke-dasharray="175.9" stroke-dashoffset="66" stroke-linecap="round" stroke-width="7" fill="none" style="filter:drop-shadow(0 0 5px rgba(168,85,247,0.5))"/></svg>
+                        <div class="tracker-ring-val">
+                          <span class="tracker-val" style="font-size:12px">5<span style="font-size:8.5px;color:rgba(255,255,255,0.4)">/8</span></span>
+                          <span class="tracker-unit">glasses</span>
+                        </div>
+                      </div>
+                      <div class="tracker-sub">1,250ml logged</div>
+                      <div class="tracker-btn tracker-btn-purple">+250ml</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="app-nav">
+                <div class="nav-item nav-idle"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">timer</span><span>Timer</span></div>
+                <div class="nav-item nav-active"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">calendar_today</span><span>Daily</span></div>
+                <div class="nav-item nav-idle"><span class="material-symbols-outlined">bar_chart</span><span>Insights</span></div>
+                <div class="nav-item nav-idle"><span class="material-symbols-outlined">settings</span><span>Settings</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Right copy -->
+        <div style="flex:1;padding-left:52px;padding-right:80px">
+          <div class="copy-panel">
+            <p class="copy-eyebrow anim-left d1">Daily Planner</p>
+            <h2 class="copy-title anim-left d2">Know your<br>mental <span>state.</span></h2>
+            <p class="copy-body anim-left d3">Select your Cognitive Focus State, track habits, and schedule your week — all in one place.</p>
+            <div class="copy-bullets anim-left d4">
+              <div class="copy-bullet"><div class="bullet-dot"></div><span>5 cognitive states from Brain Fog to Peak Focus</span></div>
+              <div class="copy-bullet"><div class="bullet-dot"></div><span>Swipeable tracker rings: Sleep, Water, Deep Focus, Meditation</span></div>
+              <div class="copy-bullet"><div class="bullet-dot"></div><span>Weekly calendar with per-day focus session dots</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="caption-bar">
+        <div class="caption-sep"></div>
+        <span class="caption-eyebrow">FocusDot — Daily</span>
+        <span class="caption-title">Know When You're In Flow.</span>
+      </div>
+    </div>
+
+    <!-- =====================================================================
+         SCENE 5: INSIGHTS + PROGRESS
+         ===================================================================== -->
+    <div class="scene" id="scene-5">
+      <div style="position:absolute;inset:0;display:flex;align-items:center;gap:0">
+        <div style="flex:0 0 44%;display:flex;align-items:center;justify-content:flex-end;padding-right:48px">
+          <div class="device float-l">
+            <div class="dyn-island">
+              <div class="dyn-camera"></div>
+              <div class="dyn-status-dot" style="background:#D2FF3A;box-shadow:0 0 8px #D2FF3A"></div>
+            </div>
+            <div class="app-scroll">
+              <div class="app-header">
+                <div class="app-logo">
+                  <div class="app-logo-icon"><span class="material-symbols-outlined" style="font-size:19px;font-variation-settings:'FILL' 1">bolt</span></div>
+                  <div class="app-logo-text"><h2>FocusDot</h2><p>Deep Flow Mode</p></div>
+                </div>
+                <div class="deep-focus-pill"><div class="dfp-dot"></div>Deep Focus</div>
+              </div>
+              <div class="insights-screen">
+                <!-- Big ring -->
+                <div class="big-ring-card">
+                  <div class="big-ring-wrap">
+                    <svg viewBox="0 0 116 116"><circle cx="58" cy="58" r="48" stroke="#1C273E" stroke-width="9" fill="none"/><circle cx="58" cy="58" r="48" stroke="#D2FF3A" stroke-dasharray="301.6" stroke-dashoffset="75.4" stroke-linecap="round" stroke-width="9" fill="none" style="filter:drop-shadow(0 0 8px rgba(210,255,58,0.6))"/></svg>
+                    <div class="big-ring-inner">
+                      <div class="big-ring-val">3h 45m</div>
+                      <div class="big-ring-sub">of 5h Goal (75%)</div>
+                    </div>
+                  </div>
+                  <div class="big-ring-stats">
+                    <div class="brs-item"><span class="brs-label">Completed</span><span class="brs-val">3 Sessions</span></div>
+                    <div class="brs-item"><span class="brs-label">Deep Flow Rate</span><span class="brs-val brs-val-lime">94%</span></div>
+                  </div>
+                </div>
+                <!-- Weekly consistency -->
+                <div>
+                  <div class="ins-label">Weekly Consistency <span class="streak-ins"><span class="material-symbols-outlined" style="font-size:10px">local_fire_department</span>5-Day Streak</span> <span style="font-size:9px;color:rgba(255,255,255,0.28);font-weight:400">Oct 20–26</span></div>
+                  <div class="week-cal">
+                    <div class="wc-day wc-idle"><span class="wc-dn">M</span><span class="wc-num">20</span><div class="wc-check">✓</div></div>
+                    <div class="wc-day wc-idle"><span class="wc-dn">T</span><span class="wc-num">21</span><div class="wc-check">✓</div></div>
+                    <div class="wc-day wc-idle"><span class="wc-dn">W</span><span class="wc-num">22</span><div class="wc-check">✓</div></div>
+                    <div class="wc-day wc-idle"><span class="wc-dn">T</span><span class="wc-num">23</span><div class="wc-check">✓</div></div>
+                    <div class="wc-day wc-active"><span class="wc-dn">F</span><span class="wc-num">24</span><div style="width:21px;height:21px;border-radius:50%;background:rgba(210,255,58,0.12);border:2px solid #D2FF3A;display:flex;align-items:center;justify-content:center;font-size:13px">⚡</div></div>
+                    <div class="wc-day wc-idle"><span class="wc-dn">S</span><span class="wc-num" style="color:rgba(255,255,255,0.3)">25</span><span class="wc-time">2h</span></div>
+                    <div class="wc-day wc-idle"><span class="wc-dn">S</span><span class="wc-num" style="color:rgba(255,255,255,0.3)">26</span><span class="wc-time">2h</span></div>
+                  </div>
+                </div>
+                <!-- Selected day -->
+                <div class="sd-card">
+                  <div>
+                    <div class="sd-label">Selected Day • Friday (Oct 24)</div>
+                    <div class="sd-val">3h 45m across 3 flow sessions</div>
+                    <div class="sd-sub">Tap any day to inspect</div>
+                  </div>
+                  <div class="active-today">Active Today</div>
+                </div>
+                <!-- Flow blocks -->
+                <div>
+                  <div class="ins-label" style="margin-bottom:5px">Recent Flow Blocks <span style="font-size:9px;color:rgba(255,255,255,0.28);font-weight:400">2 sessions</span></div>
+                  <div style="display:flex;flex-direction:column;gap:5px">
+                    <div class="flow-block">
+                      <div class="fb-left">
+                        <div class="fb-icon" style="background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.25)">🖥️</div>
+                        <div>
+                          <div class="fb-name">Jetpack Compose Architecture</div>
+                          <div class="fb-meta">Coding • 45 mins • 25m Focus + 20m Deep</div>
+                        </div>
+                      </div>
+                      <div class="fb-badge">+45m</div>
+                    </div>
+                    <div class="flow-block">
+                      <div class="fb-left">
+                        <div class="fb-icon" style="background:rgba(167,139,250,0.12);border:1px solid rgba(167,139,250,0.25)">📐</div>
+                        <div>
+                          <div class="fb-name">System Design Deep Dive</div>
+                          <div class="fb-meta">Study • 30 mins • High Retention Review</div>
+                        </div>
+                      </div>
+                      <div class="fb-badge">+30m</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="app-nav">
+                <div class="nav-item nav-idle"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">timer</span><span>Timer</span></div>
+                <div class="nav-item nav-idle"><span class="material-symbols-outlined">calendar_today</span><span>Daily</span></div>
+                <div class="nav-item nav-active"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">bar_chart</span><span>Insights</span></div>
+                <div class="nav-item nav-idle"><span class="material-symbols-outlined">settings</span><span>Settings</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Right copy -->
+        <div style="flex:1;padding-left:52px;padding-right:80px">
+          <div class="copy-panel">
+            <p class="copy-eyebrow anim-left d1">Insights</p>
+            <h2 class="copy-title anim-left d2">See your<br>flow <span>data.</span></h2>
+            <p class="copy-body anim-left d3">Track your weekly consistency, session blocks, and deep flow rate across every study subject.</p>
+            <div class="copy-bullets anim-left d4">
+              <div class="copy-bullet"><div class="bullet-dot"></div><span>3h 45m today — 75% of 5h daily goal</span></div>
+              <div class="copy-bullet"><div class="bullet-dot"></div><span>5-Day Consistency Streak • 94% Deep Flow Rate</span></div>
+              <div class="copy-bullet"><div class="bullet-dot"></div><span>Jetpack Compose, System Design, Electromagnetism tracked</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="caption-bar">
+        <div class="caption-sep"></div>
+        <span class="caption-eyebrow">FocusDot — Insights</span>
+        <span class="caption-title">3h 45m. 94% Deep Flow. 5-Day Streak.</span>
+      </div>
+    </div>
+
+    <!-- =====================================================================
+         SCENE 6: STUDY PLAN
+         ===================================================================== -->
+    <div class="scene" id="scene-6">
+      <div style="position:absolute;inset:0;display:flex;align-items:center;gap:0">
+        <div style="flex:0 0 44%;display:flex;align-items:center;justify-content:flex-end;padding-right:48px">
+          <div class="device float-r">
+            <div class="dyn-island">
+              <div class="dyn-camera"></div>
+              <div class="dyn-status-dot" style="background:#D2FF3A;box-shadow:0 0 8px #D2FF3A"></div>
+            </div>
+            <div class="app-scroll">
+              <div class="app-header">
+                <div class="app-logo">
+                  <div class="app-logo-icon"><span class="material-symbols-outlined" style="font-size:19px;font-variation-settings:'FILL' 1">bolt</span></div>
+                  <div class="app-logo-text"><h2>FocusDot</h2><p>Deep Flow Mode</p></div>
+                </div>
+                <div class="deep-focus-pill"><div class="dfp-dot"></div>Deep Focus</div>
+              </div>
+              <div class="insights-screen" style="gap:9px">
+                <div class="task-card-wrap">
+                  <div class="task-header">
+                    <div>
+                      <div class="task-title">Today's Study Plan</div>
+                      <div style="font-size:9px;color:rgba(255,255,255,0.38);margin-top:1px">Plan topics. Finish one block at a time.</div>
+                    </div>
+                    <div class="add-task-btn">+ Add Task</div>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;font-size:10.5px;color:rgba(255,255,255,0.4);margin-bottom:7px;font-weight:600">
+                    <span>0 of 3 tasks completed</span><span>0 / 135 mins</span>
+                  </div>
+                  <!-- Task 1 -->
+                  <div class="task-item">
+                    <div class="task-check" style="border-color:#D2FF3A"><div style="width:7px;height:7px;border-radius:50%;background:rgba(210,255,58,0.3)"></div></div>
+                    <div class="task-info">
+                      <div class="task-tag"><div class="tag tag-green">Chemistry</div><div class="status-green">In Progress</div></div>
+                      <div class="task-name">Chemistry — Haloalkanes</div>
+                      <div class="task-meta">SN1 and SN2 reaction mechanisms & practice sheet</div>
+                      <div class="task-meta" style="margin-top:2px;display:flex;align-items:center;gap:3px"><span class="material-symbols-outlined" style="font-size:11px">schedule</span>7:00 PM – 7:45 PM • 45 mins</div>
+                    </div>
+                  </div>
+                  <!-- Task 2 -->
+                  <div class="task-item">
+                    <div class="task-check"></div>
+                    <div class="task-info">
+                      <div class="task-tag"><div class="tag tag-purple">Mathematics</div><div class="tag" style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.38)">Upcoming</div></div>
+                      <div class="task-name">Mathematics — Vector Calculus</div>
+                      <div class="task-meta">Surface integrals & Stokes Theorem proofs</div>
+                      <div class="task-meta" style="margin-top:2px;display:flex;align-items:center;gap:3px"><span class="material-symbols-outlined" style="font-size:11px">schedule</span>8:00 PM – 9:00 PM • 60 mins</div>
+                    </div>
+                  </div>
+                  <!-- Task 3 Done -->
+                  <div class="task-item" style="opacity:0.6">
+                    <div class="task-check task-check-done">✓</div>
+                    <div class="task-info">
+                      <div class="task-tag"><div class="tag tag-blue">Physics</div><div class="tag" style="background:rgba(210,255,58,0.07);color:rgba(210,255,58,0.55)">Completed</div></div>
+                      <div class="task-name task-name-done">Physics — Electromagnetism</div>
+                      <div class="task-meta" style="text-decoration:line-through">Gauss Law problem set #4 and dielectric spheres</div>
+                      <div class="task-meta" style="margin-top:2px;display:flex;align-items:center;gap:3px"><span class="material-symbols-outlined" style="font-size:11px">check_circle</span>4:30 PM – 5:15 PM • 45 mins finished</div>
+                    </div>
+                  </div>
+                </div>
+                <!-- Stats row -->
+                <div style="display:flex;gap:7px">
+                  <div style="flex:1;padding:9px;border-radius:12px;background:#0E1119;border:1px solid rgba(255,255,255,0.06);text-align:center">
+                    <div style="font-size:8.5px;color:rgba(255,255,255,0.38);margin-bottom:2px">Focus Time</div>
+                    <div style="font-size:17px;font-weight:900;font-family:'JetBrains Mono',monospace;color:#fff">3h 45m</div>
+                  </div>
+                  <div style="flex:1;padding:9px;border-radius:12px;background:#0E1119;border:1px solid rgba(255,255,255,0.06);text-align:center">
+                    <div style="font-size:8.5px;color:rgba(255,255,255,0.38);margin-bottom:2px">Sessions</div>
+                    <div style="font-size:17px;font-weight:900;font-family:'JetBrains Mono',monospace;color:#D2FF3A">3</div>
+                  </div>
+                  <div style="flex:1;padding:9px;border-radius:12px;background:#0E1119;border:1px solid rgba(255,255,255,0.06);text-align:center">
+                    <div style="font-size:8.5px;color:rgba(255,255,255,0.38);margin-bottom:2px">Flow Rate</div>
+                    <div style="font-size:17px;font-weight:900;font-family:'JetBrains Mono',monospace;color:#D2FF3A">94%</div>
+                  </div>
+                </div>
+              </div>
+              <div class="app-nav">
+                <div class="nav-item nav-idle"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">timer</span><span>Timer</span></div>
+                <div class="nav-item nav-idle"><span class="material-symbols-outlined">calendar_today</span><span>Daily</span></div>
+                <div class="nav-item nav-active"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">bar_chart</span><span>Insights</span></div>
+                <div class="nav-item nav-idle"><span class="material-symbols-outlined">settings</span><span>Settings</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Right copy -->
+        <div style="flex:1;padding-left:52px;padding-right:80px">
+          <div class="copy-panel">
+            <p class="copy-eyebrow anim-left d1">Study Planner</p>
+            <h2 class="copy-title anim-left d2">Every subject.<br>Every <span>block.</span></h2>
+            <p class="copy-body anim-left d3">Schedule exam prep by subject and time slot. Track what's done, what's in progress, and what's coming next.</p>
+            <div class="copy-bullets anim-left d4">
+              <div class="copy-bullet"><div class="bullet-dot"></div><span>Chemistry — Haloalkanes, SN1 & SN2 reactions</span></div>
+              <div class="copy-bullet"><div class="bullet-dot"></div><span>Mathematics — Vector Calculus, Stokes Theorem</span></div>
+              <div class="copy-bullet"><div class="bullet-dot" style="background:rgba(210,255,58,0.3)"></div><span style="text-decoration:line-through;opacity:0.5">Physics — Electromagnetism ✓</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="caption-bar">
+        <div class="caption-sep"></div>
+        <span class="caption-eyebrow">FocusDot — Study Planner</span>
+        <span class="caption-title">Chemistry. Maths. Physics. All Planned.</span>
+      </div>
+    </div>
+
+    <!-- =====================================================================
+         SCENE 7: BRAND FINALE
+         ===================================================================== -->
+    <div class="scene" id="scene-7">
+      <div class="finale-wrap">
+        <div class="finale-dot fd1"></div>
+        <h1 class="finale-brand text-reveal">FOCUSDOT</h1>
+        <p class="finale-tagline text-reveal-sub">Deep Flow Mode</p>
+        <p class="finale-motto fd2">"Focus on what matters."</p>
+        <div class="finale-line fd3"></div>
+        <p class="finale-url fd4">focusdotflow.vercel.app</p>
+      </div>
+    </div>
+
+  </div><!-- end #stage -->
+</div><!-- end #stage-wrapper -->
+
+<!-- Studio Controls -->
+<div id="controls">
+  <button id="btn-play" class="active-btn">⏸ Pause</button>
+  <button id="btn-restart">↺ Restart</button>
+  <div class="sep"></div>
+  <div class="scene-nav">
+    <button data-scene="0" class="cur-scene">S1: Brand</button>
+    <button data-scene="1">S2: Timer</button>
+    <button data-scene="2">S3: 5 Themes</button>
+    <button data-scene="3">S4: Daily</button>
+    <button data-scene="4">S5: Insights</button>
+    <button data-scene="5">S6: Planner</button>
+    <button data-scene="6">S7: Finale</button>
+  </div>
+  <div class="sep"></div>
+  <input type="range" id="scrubber" min="0" max="58000" step="16" value="0">
+  <span id="time-label" style="min-width:65px">00:00 / 00:58</span>
+  <div class="sep"></div>
+  <button id="btn-audio" class="active-btn">🔊 Audio: ON</button>
+  <button id="btn-fs">⛶ Fullscreen</button>
+  <button id="btn-export">⏺ Record Video</button>
+  <span id="export-label" style="font-size:10.5px;color:#D2FF3A;max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span>
+</div>
+
+<!-- ===========================================================================
+     WEB AUDIO API PROCEDURAL SOUNDTRACK ENGINE
+     =========================================================================== -->
+<script>
+  let audioCtx = null;
+  let isAudioMuted = false;
+  let droneGain = null, padGain = null, binauralGain = null;
+  let droneOsc1 = null, droneOsc2 = null, padOscs = [];
+
+  
+
+  // ═══ STAGE SCALING (9:16) ═══
+  const stage = document.getElementById('stage');
+  function scaleStage() {
+    const W = window.innerWidth, H = window.innerHeight - 52;
+    const sx = W / 1080, sy = H / 1920;
+    const s = Math.min(sx, sy);
+    stage.style.transform = `scale(${s})`;
+    stage.style.left = `${(W - 1080 * s) / 2}px`;
+    stage.style.top = `${(H - 1920 * s) / 2}px`;
+  }
+  window.addEventListener('resize', scaleStage);
+  scaleStage();
+
+  // ═══ BACKGROUND CANVAS ═══
+  const bgCanvas = document.getElementById('bg-canvas');
+  const bgCtx = bgCanvas.getContext('2d');
+  const PARTICLES = Array.from({length:120}, (_,i) => ({
+    x: Math.random() * 1080,
+    y: Math.random() * 1920,
+    r: 1 + Math.random() * 2.5,
+    vx: (Math.random() - 0.5) * 0.25,
+    vy: (Math.random() - 0.5) * 0.25,
+    phase: Math.random() * Math.PI * 2,
+    baseR: 1 + Math.random() * 2.5
+  }));
+
+  function renderBg(t, themeName) {
+    bgCtx.clearRect(0,0,1080,1920);
+    const themes = {
+      green:  [['#020508','#020b06','#010403'], [540,500], [540,1400]],
+      purple: [['#05020a','#0e031a','#040106'], [540,500], [540,1400]],
+      red:    [['#090203','#1a0305','#060102'], [540,500], [540,1400]],
+      cyan:   [['#010609','#02131a','#010406'], [540,500], [540,1400]],
+      gold:   [['#080501','#190e02','#050301'], [540,500], [540,1400]]
+    };
+    const th = themes[themeName] || themes['green'];
+    const [cols, [ax,ay], [bx,by]] = th;
+    const g1 = bgCtx.createRadialGradient(ax,ay,0,ax,ay,750);
+    g1.addColorStop(0, cols[1]); g1.addColorStop(1, cols[0]);
+    bgCtx.fillStyle = g1; bgCtx.fillRect(0,0,1080,1920);
+
+    const g2 = bgCtx.createRadialGradient(bx,by,0,bx,by,650);
+    g2.addColorStop(0, cols[2]); g2.addColorStop(1, 'transparent');
+    bgCtx.fillStyle = g2; bgCtx.fillRect(0,0,1080,1920);
+
+    for(let i=0; i<3; i++){
+      const bx2 = 540 + Math.sin(t*0.00007+i*2.1)*260;
+      const by2 = 960 + Math.cos(t*0.00005+i*1.7)*350;
+      const r = 300 + i*60;
+      const gb = bgCtx.createRadialGradient(bx2,by2,0,bx2,by2,r);
+      const c = (themeName==='purple')?'rgba(168,85,247,0.06)':(themeName==='red')?'rgba(255,42,85,0.06)':(themeName==='cyan')?'rgba(0,245,255,0.06)':(themeName==='gold')?'rgba(245,158,11,0.06)':'rgba(210,255,58,0.06)';
+      gb.addColorStop(0, c); gb.addColorStop(1, 'transparent');
+      bgCtx.fillStyle = gb; bgCtx.fillRect(0,0,1080,1920);
+    }
+
+    for (let p of PARTICLES) {
+      p.x = (p.x + p.vx + 1080) % 1080;
+      p.y = (p.y + p.vy + 1920) % 1920;
+      const alpha = 0.08 + 0.1 * Math.sin(p.phase + t*0.0007);
+      bgCtx.beginPath();
+      bgCtx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      bgCtx.fillStyle = `rgba(210,255,58,${Math.max(0,alpha)})`;
+      bgCtx.fill();
+    }
+  }
+
+  // ═══ WEBGL RAYMARCHED ORB SHADER ═══
+  const VS = `attribute vec2 a_position;void main(){gl_Position=vec4(a_position,0.0,1.0);}`;
+const FS = `
+    #ifdef GL_ES
+    precision highp float;
+    #endif
+    uniform vec2 u_resolution;
+    uniform float u_time;
+    uniform float u_flow_active;
+    uniform int u_theme;
+    vec3 mod289(vec3 x){return x-floor(x*(1.0/289.0))*289.0;}
+    vec2 mod289(vec2 x){return x-floor(x*(1.0/289.0))*289.0;}
+    vec3 permute(vec3 x){return mod289(((x*34.0)+1.0)*x);}
+    float snoise(vec2 v){
+      const vec4 C=vec4(0.211324865405187,0.366025403784439,-0.577350269189626,0.024390243902439);
+      vec2 i=floor(v+dot(v,C.yy));
+      vec2 x0=v-i+dot(i,C.xx);
+      vec2 i1=(x0.x>x0.y)?vec2(1.0,0.0):vec2(0.0,1.0);
+      vec4 x12=x0.xyxy+C.xxzz;x12.xy-=i1;
+      i=mod289(i);
+      vec3 p=permute(permute(i.y+vec3(0.0,i1.y,1.0))+i.x+vec3(0.0,i1.x,1.0));
+      vec3 m=max(0.5-vec3(dot(x0,x0),dot(x12.xy,x12.xy),dot(x12.zw,x12.zw)),0.0);
+      m=m*m;m=m*m;
+      vec3 x=2.0*fract(p*C.www)-1.0;
+      vec3 h=abs(x)-0.5;
+      vec3 ox=floor(x+0.5);
+      vec3 a0=x-ox;
+      m*=1.79284291400159-0.85373472095314*(a0*a0+h*h);
+      vec3 g;
+      g.x=a0.x*x0.x+h.x*x0.y;g.yz=a0.yz*x12.xz+h.yz*x12.yw;
+      return 130.0*dot(m,g);
+    }
+    mat2 rot2d(float a){float c=cos(a),s=sin(a);return mat2(c,-s,s,c);}
+    float fbm(vec2 p){float f=0.0;f+=0.5*snoise(p);p*=2.02;f+=0.25*snoise(p);p*=2.03;f+=0.125*snoise(p);return f;}
+    void main(){
+      vec2 st=(gl_FragCoord.xy*2.0-u_resolution.xy)/min(u_resolution.x,u_resolution.y);
+      float dist=length(st);float radius=0.965;
+      float px=2.0/min(u_resolution.x,u_resolution.y);
+      float edge=smoothstep(radius,radius-px*1.5,dist);
+      if(edge<=0.0){gl_FragColor=vec4(0.0);return;}
+      float z=sqrt(max(0.0,radius*radius-dist*dist))/radius;
+      vec3 N=normalize(vec3(st.x/radius,st.y/radius,z));
+      float NdotV=max(0.0,dot(N,vec3(0.0,0.0,1.0)));
+      float fresnel=pow(1.0-NdotV,2.75);
+      float tau=6.28318530718;
+      float timeSpeed=1.0+0.25*u_flow_active;
+      float cycleTime=u_time*(tau/7.0)*timeSpeed;
+      vec2 refractedUV=st*(0.80+0.20*NdotV);
+      refractedUV=rot2d(0.3927)*refractedUV;
+      refractedUV=rot2d(cycleTime)*refractedUV;
+      float vortexTwist=length(refractedUV)*1.65;
+      vec2 twistedUV=rot2d(vortexTwist*0.65-cycleTime*0.25)*refractedUV;
+      vec2 q=vec2(fbm(twistedUV*2.1+vec2(1.7,3.2)),fbm(twistedUV*2.1+vec2(4.8,1.9)));
+      vec2 r_warp=vec2(fbm(twistedUV*2.4+2.2*q+vec2(sin(cycleTime*0.4),cos(cycleTime*0.4))),fbm(twistedUV*2.4+2.2*q+vec2(cos(cycleTime*0.4),sin(cycleTime*0.4))));
+      float fluid=fbm(twistedUV*2.2+2.6*r_warp);
+      float ribbon=smoothstep(-0.25,0.65,fluid);
+      float ribbonFine=smoothstep(0.12,0.82,fluid);
+      vec3 obsidianCore=vec3(0.012,0.020,0.026);
+      vec3 primaryColor,secondaryColor,highlightColor,deepShade;
+      if(u_theme==1){deepShade=vec3(0.012,0.045,0.032);primaryColor=vec3(0.030,0.220,0.150);secondaryColor=vec3(0.060,0.720,0.500);highlightColor=vec3(0.820,1.000,0.350);}
+      else if(u_theme==2){deepShade=vec3(0.018,0.035,0.065);primaryColor=vec3(0.000,0.320,0.450);secondaryColor=vec3(0.000,0.850,0.950);highlightColor=vec3(0.824,1.000,0.227);}
+      else if(u_theme==3){deepShade=vec3(0.042,0.012,0.016);primaryColor=vec3(0.360,0.035,0.075);secondaryColor=vec3(0.950,0.120,0.260);highlightColor=vec3(1.000,0.460,0.200);}
+      else if(u_theme==4){deepShade=vec3(0.026,0.012,0.045);primaryColor=vec3(0.240,0.045,0.380);secondaryColor=vec3(0.660,0.240,0.980);highlightColor=vec3(0.920,0.460,1.000);}
+      else{deepShade=vec3(0.018,0.038,0.032);primaryColor=vec3(0.045,0.240,0.180);secondaryColor=vec3(0.063,0.725,0.506);highlightColor=vec3(0.824,1.000,0.227);}
+      vec3 fluidColor=mix(deepShade,primaryColor,q.x*0.5+0.5);
+      fluidColor=mix(fluidColor,secondaryColor,ribbon*0.82);
+      fluidColor=mix(fluidColor,highlightColor,ribbonFine*0.88);
+      float sparkleNoise=snoise(twistedUV*8.0+cycleTime*0.5);
+      float sparkles=pow(max(0.0,sparkleNoise),6.0)*ribbonFine;
+      fluidColor+=vec3(0.95,1.0,0.6)*sparkles*1.5;
+      float centerDist=dist/radius;
+      float coreDarkness=smoothstep(0.82,0.18,centerDist);
+      vec3 internalColor=mix(fluidColor,obsidianCore,coreDarkness*0.80);
+      float caRed=pow(clamp(dist*1.015/radius,0.0,1.0),5.0);
+      float caGreen=pow(clamp(dist/radius,0.0,1.0),6.5);
+      float caBlue=pow(clamp(dist*0.985/radius,0.0,1.0),4.0);
+      vec3 opticalRim=vec3(caRed*0.40*highlightColor.r,caGreen*0.60*highlightColor.g,caBlue*0.50*secondaryColor.b)*fresnel*1.1;
+      vec3 rimGlow=mix(secondaryColor,highlightColor,0.5+0.5*sin(cycleTime+st.x*2.0))*fresnel*0.85;
+      vec2 topSpecCoord=vec2((st.x-0.05)*1.75,(st.y-0.50)*4.4);
+      float topSpec=exp(-dot(topSpecCoord,topSpecCoord)*2.8)*NdotV;
+      vec3 topSpecColor=mix(highlightColor,vec3(0.96,0.98,1.0),0.85)*topSpec*0.88;
+      vec2 topMicroCoord=vec2((st.x+0.20)*3.6,(st.y-0.61)*5.2);
+      float topMicro=exp(-dot(topMicroCoord,topMicroCoord)*6.5);
+      vec3 topMicroColor=vec3(0.95,0.98,1.0)*topMicro*0.65;
+      vec2 botCausticCoord=vec2(st.x*1.45,(st.y+0.60)*4.2);
+      float botCaustic=exp(-dot(botCausticCoord,botCausticCoord)*3.4)*fresnel;
+      vec3 botCausticColor=highlightColor*botCaustic*0.45;
+      vec3 finalColor=internalColor+rimGlow+opticalRim+topSpecColor+topMicroColor+botCausticColor;
+      finalColor=clamp(finalColor,0.0,1.0);
+      gl_FragColor=vec4(finalColor,edge*(0.92+0.08*fresnel));
+    }
+  `;
+
+  function makeOrb(canvas) {
+    const gl = canvas.getContext('webgl',{antialias:true,alpha:true,premultipliedAlpha:false});
+    if(!gl) return null;
+    function mkShader(type, src) {
+      const sh = gl.createShader(type);
+      gl.shaderSource(sh, src); gl.compileShader(sh);
+      return sh;
+    }
+    const vs=mkShader(gl.VERTEX_SHADER,VS), fs=mkShader(gl.FRAGMENT_SHADER,FS);
+    const prog=gl.createProgram();
+    gl.attachShader(prog,vs); gl.attachShader(prog,fs); gl.linkProgram(prog);
+    gl.useProgram(prog);
+    const pa=gl.getAttribLocation(prog,'a_position');
+    const uRes=gl.getUniformLocation(prog,'u_resolution');
+    const uTime=gl.getUniformLocation(prog,'u_time');
+    const uFlow=gl.getUniformLocation(prog,'u_flow_active');
+    const uTheme=gl.getUniformLocation(prog,'u_theme');
+    const buf=gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+    gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(pa);
+    gl.vertexAttribPointer(pa,2,gl.FLOAT,false,0,0);
+    const start=performance.now();
+    function resize(){
+      const dpr=Math.max(window.devicePixelRatio||1,2);
+      const rect=canvas.getBoundingClientRect();
+      const W=Math.round((rect.width||300)*dpr), H=Math.round((rect.height||300)*dpr);
+      if(canvas.width!==W||canvas.height!==H){canvas.width=W;canvas.height=H;gl.viewport(0,0,W,H);}
+    }
+    resize();
+    function draw(now){
+      resize();
+      const t=(now-start)/1000;
+      gl.useProgram(prog);
+      gl.uniform2f(uRes,canvas.width,canvas.height);
+      gl.uniform1f(uTime,t);
+      gl.uniform1f(uFlow,1.0);
+      gl.uniform1i(uTheme,window.__activeThemeIdx||0);
+      gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+    }
+    return {draw};
+  }
+
+  const orb2 = makeOrb(document.getElementById('orb-canvas'));
+  const orb3 = makeOrb(document.getElementById('orb-canvas-3'));
+
+  const THEMES = [
+    { name:'Bioluminescent Flow', idx:0, accent:'#D2FF3A', glow:'rgba(210,255,58,0.35)',  ring:['#E4FF70','#D2FF3A','#10B981'], bg:'green',
+      sc:{icon:'🧠',name:'Binaural Beats (40Hz)',desc:'Gamma wave focus • 40Hz acoustic synchronization'}, s3label:'40Hz Gamma', chip:0, chime:880 },
+    { name:'Emerald Focus',       idx:1, accent:'#10B981', glow:'rgba(16,185,129,0.4)',   ring:['#10B981','#10B981','#059669'], bg:'green',
+      sc:{icon:'🌧️',name:'Rain Calm',desc:'Natural steady rainfall for deep focus'}, s3label:'Rain Calm', chip:1, chime:783.99 },
+    { name:'Cyber Aurora',        idx:2, accent:'#00F5FF', glow:'rgba(0,245,255,0.4)',    ring:['#00F5FF','#38BDF8','#D2FF3A'], bg:'cyan',
+      sc:{icon:'🌌',name:'Deep Cosmic Drone',desc:'Resonant sub-harmonic drone for zero distraction'}, s3label:'Cosmic Drone', chip:3, chime:987.77 },
+    { name:'Crimson Flare',       idx:3, accent:'#FF2A55', glow:'rgba(255,42,85,0.4)',    ring:['#FF2A55','#FF6B35','#FFA040'], bg:'red',
+      sc:{icon:'🌧️',name:'Rain Calm',desc:'Natural steady rainfall for focus'}, s3label:'Rain Calm', chip:1, chime:659.25 },
+    { name:'Cosmic Amethyst',     idx:4, accent:'#A855F7', glow:'rgba(168,85,247,0.4)',   ring:['#A855F7','#C084FC','#EB75FF'], bg:'purple',
+      sc:{icon:'🧠',name:'Binaural Beats (40Hz)',desc:'Gamma wave focus • 40Hz acoustic synchronization'}, s3label:'40Hz Gamma', chip:0, chime:1046.50 },
+  ];
+
+  function hexToRgb(hex){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return `${r},${g},${b}`;}
+
+  function applyTheme(ti) {
+    const th = THEMES[ti % THEMES.length];
+    if(orb2) orb2.setTheme(th.idx);
+    if(orb3) orb3.setTheme(th.idx);
+
+    // Scene 2 — orb glow + ring
+    const og = document.getElementById('orb-glow-bg');
+    if(og) og.style.background = `radial-gradient(circle,${th.glow},transparent)`;
+    const svgR = document.getElementById('timer-ring-svg');
+    if(svgR) svgR.setAttribute('stroke', th.ring[1]);
+    document.getElementById('rg1')?.setAttribute('stop-color', th.ring[0]);
+    document.getElementById('rg2')?.setAttribute('stop-color', th.ring[1]);
+    document.getElementById('rg3')?.setAttribute('stop-color', th.ring[2]);
+
+    // Orb switcher
+    const swDot = document.getElementById('orb-sw-dot');
+    if(swDot){ swDot.style.background=`linear-gradient(135deg,${th.accent},${th.ring[2]})`; swDot.style.boxShadow=`0 0 8px ${th.glow}`; }
+    const swLbl = document.getElementById('orb-sw-label');
+    if(swLbl) swLbl.textContent = `Focus Sphere: ${th.name}`;
+
+    // EQ bars & status dots
+    document.querySelectorAll('.eq-bar').forEach(b=>b.style.background=th.accent);
+    const fpDot = document.getElementById('fp-dot');
+    if(fpDot) fpDot.style.background = th.accent;
+    document.querySelectorAll('.dyn-status-dot').forEach(d=>{d.style.background=th.accent;d.style.boxShadow=`0 0 8px ${th.accent}`;});
+    document.querySelectorAll('.dfp-dot').forEach(d=>d.style.background=th.accent);
+
+    // Soundscape
+    if(th.sc){
+      const si=document.getElementById('sc-icon'),sn=document.getElementById('sc-name'),sd=document.getElementById('sc-desc');
+      if(si) si.textContent=th.sc.icon;
+      if(sn) sn.textContent=th.sc.name;
+      if(sd) sd.textContent=th.sc.desc;
+      for(let i=0;i<4;i++){const c=document.getElementById(`chip-${i}`);if(c)c.className=`sc-chip ${th.chip===i?'sc-chip-active':'sc-chip-idle'}`;}
+    }
+
+    // Scene 3
+    const s3ring=document.getElementById('scene3-ring');
+    if(s3ring){s3ring.setAttribute('stroke',th.ring[1]);s3ring.style.filter=`drop-shadow(0 0 14px ${th.glow})`;}
+    const s3glow=document.getElementById('scene3-glow');
+    if(s3glow) s3glow.style.background=`radial-gradient(circle,${th.glow},transparent)`;
+    const s3audio=document.getElementById('s3-audio');
+    if(s3audio) s3audio.textContent=th.s3label||'40Hz Gamma';
+    const s3name=document.getElementById('s3-orb-name');
+    if(s3name) s3name.textContent=`Focus Sphere: ${th.name}`;
+
+    // Theme carousel
+    for(let i=0;i<5;i++){
+      const tc=document.getElementById(`tc-${i}`);
+      if(!tc) continue;
+      if(i===ti%5){
+        tc.style.background=`rgba(${hexToRgb(THEMES[i].accent)},0.1)`;
+        tc.style.border=`1px solid rgba(${hexToRgb(THEMES[i].accent)},0.32)`;
+        tc.style.color=THEMES[i].accent;
+        tc.style.fontWeight='700';
+      } else {
+        tc.style.background='rgba(0,0,0,0.3)';
+        tc.style.border='1px solid rgba(255,255,255,0.1)';
+        tc.style.color='rgba(255,255,255,0.4)';
+        tc.style.fontWeight='600';
+      }
+    }
+    return th.bg;
+  }
+
+  // ---- SCENE DEFINITIONS ----
+  
+
+  const SCENES = [
+    { id:'scene-1', start:0,     end:7000,  label:'S1: Brand Opening' },
+    { id:'scene-2', start:7000,  end:17500, label:'S2: The Timer & Orb' },
+    { id:'scene-3', start:17500, end:28000, label:'S3: 5 Cosmic Themes' },
+    { id:'scene-4', start:28000, end:37000, label:'S4: Daily & Cognitive' },
+    { id:'scene-5', start:37000, end:46000, label:'S5: Insights & Progress' },
+    { id:'scene-6', start:46000, end:53000, label:'S6: Study Planner' },
+    { id:'scene-7', start:53000, end:58000, label:'S7: Brand Finale' },
+  ];
+  const TOTAL = 58000;
+
+  let currentMs=0, isPlaying=true, lastTs=0, lastScene=-1, bgTheme='green';
+  let themeRotMs=0, curThemeIdx=0;
+
+  function fmtSecs(ms){
+    const s=Math.floor(ms/1000);
+    return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+  }
+
+  function activateScene(idx){
+    if(idx===lastScene) return;
+    lastScene=idx;
+    SCENES.forEach((s,i)=>{
+      const el=document.getElementById(s.id);
+      if(el) el.classList.toggle('active', i===idx);
+      const b=document.querySelector(`button[data-scene="${i}"]`);
+      if(b) b.classList.toggle('cur-scene', i===idx);
+    });
+    if(idx===0) playBassWhoosh(55, 2.0);
+    else if(idx===1) { playChime(587); playBassWhoosh(70, 1.2); }
+    else if(idx===2) { playChime(659); }
+    else if(idx===3) { playChime(784); playBassWhoosh(80, 1.0); }
+    else if(idx===4) { playChime(880); }
+    else if(idx===5) { playChime(988); playBassWhoosh(75, 1.1); }
+    else if(idx===6) { playChime(1174); playBassWhoosh(50, 2.5); }
+  }
+
+  function renderFrame(ts){
+    if(!lastTs) lastTs=ts;
+    const delta=Math.min(ts-lastTs,100);
+    lastTs=ts;
+    if(isPlaying){
+      currentMs+=delta;
+      if(currentMs>=TOTAL) currentMs=0;
+      document.getElementById('scrubber').value=currentMs;
+      document.getElementById('time-display').textContent=`${fmtSecs(currentMs)} / 00:58`;
+    }
+
+    let si=0;
+    for(let i=0;i<SCENES.length;i++){
+      if(currentMs>=SCENES[i].start) si=i;
+    }
+    activateScene(si);
+
+    // Dynamic timer countdown
+    const elapsed=(currentMs-SCENES[1].start)/1000;
+    const secs=Math.max(0,1500-Math.floor(elapsed));
+    const dStr=`${String(Math.floor(secs/60)).padStart(2,'0')}:${String(secs%60).padStart(2,'0')}`;
+    const td=document.getElementById('timer-display'); if(td) td.textContent=dStr;
+    const st=document.getElementById('s3-timer'); if(st) st.textContent=dStr;
+
+    // Theme switching in Scene 3
+    if(si===2 && isPlaying){
+      themeRotMs+=delta;
+      if(themeRotMs>=2000){
+        themeRotMs=0;
+        curThemeIdx=(curThemeIdx+1)%THEMES.length;
+        window.__activeThemeIdx = curThemeIdx;
+        applyTheme(curThemeIdx);
+        for(let i=0;i<5;i++){
+          const tc=document.getElementById(`tc-${i}`);
+          if(tc) tc.classList.toggle('active-theme-chip', i===curThemeIdx);
+        }
+      }
+    } else if(si!==2){
+      window.__activeThemeIdx=0;
+      applyTheme(0);
+    }
+
+    renderBg(ts, bgTheme);
+    if(orb2) orb2.draw(ts);
+    if(orb3) orb3.draw(ts);
+    requestAnimationFrame(renderFrame);
+  }
+  requestAnimationFrame(renderFrame);
+
+  // Controls Handlers
+  const btnPlay=document.getElementById('btn-play');
+  btnPlay.addEventListener('click', ()=>{
+    initAudio();
+    isPlaying=!isPlaying;
+    btnPlay.textContent=isPlaying?'⏸ Pause':'▶ Play';
+  });
+
+  const btnRewind=document.getElementById('btn-rewind');
+  btnRewind.addEventListener('click', ()=>{
+    currentMs=0;
+    document.getElementById('scrubber').value=0;
+  });
+
+  const scrubber=document.getElementById('scrubber');
+  scrubber.addEventListener('input', (e)=>{
+    currentMs=parseInt(e.target.value);
+    document.getElementById('time-display').textContent=`${fmtSecs(currentMs)} / 00:58`;
+  });
+
+  document.querySelectorAll('.scene-nav button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      initAudio();
+      const sIdx=parseInt(btn.getAttribute('data-scene'));
+      currentMs=SCENES[sIdx].start;
+      document.getElementById('scrubber').value=currentMs;
+      activateScene(sIdx);
+    });
+  });
+
+  const btnAudio=document.getElementById('btn-audio');
+  btnAudio.addEventListener('click', ()=>{
+    initAudio();
+    if(audioCtx){
+      if(audioCtx.state==='suspended') audioCtx.resume();
+      else if(audioCtx.state==='running') audioCtx.suspend();
+      btnAudio.textContent=(audioCtx.state==='running')?'🔊 Audio: On':'🔇 Audio: Muted';
+    }
+  });
+
+  const btnFs=document.getElementById('btn-fs');
+  btnFs.addEventListener('click', ()=>{
+    if(!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{});
+    else document.exitFullscreen().catch(()=>{});
+  });
+</script>
+</body>
+</html>
