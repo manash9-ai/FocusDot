@@ -85,7 +85,10 @@
   </div>
   <h1>Deep Flow Offline</h1>
   <p>You appear to be disconnected. Cached features and study sessions remain saved locally on your device.</p>
-  <button class="retry-btn" onclick="window.location.reload()">Reconnect to FocusDot</button>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+    <button class="retry-btn" onclick="window.location.reload()">Reconnect to FocusDot</button>
+    <a href="/app.html" class="retry-btn" style="background:transparent;color:#D2FF3A;border:1px solid rgba(210,255,58,0.5);text-decoration:none;display:inline-flex;align-items:center;justify-content:center">Launch Cached App</a>
+  </div>
   <div class="badge">FocusDot Standalone PWA</div>
 </body>
 </html>

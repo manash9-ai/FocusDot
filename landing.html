@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 <head>
+<script>
+  // Forward OAuth or magic-link callback tokens to the app automatically
+  if (window.location.hash.includes('access_token=') || window.location.hash.includes('error=') || window.location.search.includes('code=')) {
+    window.location.replace('/app.html' + window.location.search + window.location.hash);
+  }
+</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FocusDot — Official Product Page | Deep Flow Mode</title>
