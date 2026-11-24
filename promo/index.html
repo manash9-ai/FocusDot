@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FocusDot — 30s 9:16 Vertical Launch Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      background-color: #030407;
+      color: #FFFFFF;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+      overflow-x: hidden;
+    }
+    .font-chrono {
+      font-family: 'JetBrains Mono', monospace;
+      font-feature-settings: "tnum" 1, "zero" 1;
+      font-variant-numeric: tabular-nums;
+    }
+    /* 9:16 Vertical Viewport (1080 x 1920) */
+    #cinema-viewport {
+      width: 1080px;
+      height: 1920px;
+      transform-origin: top left;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    /* Custom Scrubber Track */
+    input[type=range]::-webkit-slider-thumb {
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 9999px;
+      background: #D2FF3A;
+      box-shadow: 0 0 10px rgba(210, 255, 58, 0.8);
+      cursor: pointer;
+    }
+    .glow-lime {
+      box-shadow: 0 0 35px rgba(210, 255, 58, 0.45);
+    }
+    .glow-lime-lg {
+      box-shadow: 0 0 70px rgba(210, 255, 58, 0.65);
+    }
+    .text-glow {
+      text-shadow: 0 0 30px rgba(210, 255, 58, 0.7);
+    }
+    /* Dynamic soundwave visualizer */
+    @keyframes eq-dance-1 { 0%, 100% { height: 6px; } 50% { height: 26px; } }
+    @keyframes eq-dance-2 { 0%, 100% { height: 28px; } 50% { height: 8px; } }
+    @keyframes eq-dance-3 { 0%, 100% { height: 10px; } 50% { height: 32px; } }
+    @keyframes eq-dance-4 { 0%, 100% { height: 24px; } 50% { height: 6px; } }
+    .eq-bar-1 { animation: eq-dance-1 0.75s ease-in-out infinite; }
+    .eq-bar-2 { animation: eq-dance-2 0.85s ease-in-out infinite; }
+    .eq-bar-3 { animation: eq-dance-3 0.65s ease-in-out infinite; }
+    .eq-bar-4 { animation: eq-dance-4 0.90s ease-in-out infinite; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-between p-3 selection:bg-[#D2FF3A] selection:text-[#080A0F]">
+
+  <!-- Studio Header -->
+  <header class="w-full max-w-4xl flex items-center justify-between py-2.5 px-5 bg-[#080A0F]/80 backdrop-blur-xl border border-white/10 rounded-2xl mb-2 shadow-2xl">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-xl bg-[#D2FF3A]/10 border border-[#D2FF3A]/30 flex items-center justify-center text-[#D2FF3A] shadow-[0_0_15px_rgba(210,255,58,0.3)]">
+        <span class="material-symbols-outlined text-[18px]">stay_current_portrait</span>
+      </div>
+      <div>
+        <h1 class="text-xs sm:text-sm font-bold text-white tracking-tight flex items-center gap-2">
+          FocusDot 9:16 Vertical Video Studio
+          <span class="px-2 py-0.5 rounded-full text-[9px] bg-[#D2FF3A]/15 text-[#D2FF3A] border border-[#D2FF3A]/30 uppercase tracking-wider font-mono">1080×1920 Reels/Shorts</span>
+        </h1>
+        <p class="text-[10px] text-[#8E92A0]">Click video anywhere to Play / Pause</p>
+      </div>
+    </div>
+
+    <!-- Right Actions -->
+    <div class="flex items-center gap-2.5">
+      <div class="hidden sm:flex items-center gap-2 text-xs text-[#8E92A0] bg-white/[0.04] px-3 py-1.5 rounded-xl border border-white/5 font-mono">
+        <span class="w-2 h-2 rounded-full bg-[#D2FF3A] animate-pulse"></span>
+        <span id="label-scene-name">Scene 1: The Spark</span>
+      </div>
+      <button id="btn-export-video" class="px-3.5 py-1.5 rounded-xl bg-[#D2FF3A] hover:bg-[#b8e629] active:scale-95 text-[#080A0F] font-bold text-xs flex items-center gap-1.5 shadow-[0_0_20px_rgba(210,255,58,0.35)] transition-all">
+        <span class="material-symbols-outlined text-[15px]">videocam</span>
+        <span id="label-export">Export 9:16 Video</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Cinema Stage Scale Container -->
+  <main class="w-full flex-1 flex items-center justify-center relative overflow-hidden py-1">
+    
+    <!-- Scale Wrapper: Exactly fits the scaled 1080x1920 canvas -->
+    <div id="scale-wrapper" class="relative shadow-[0_0_100px_rgba(0,0,0,0.95)] rounded-[40px] overflow-hidden border-2 border-white/15 bg-[#05060A] cursor-pointer group select-none">
+
+      <!-- Big Play Overlay (shown when paused) -->
+      <div id="big-play-overlay" class="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/50 backdrop-blur-[2px] transition-opacity duration-300 opacity-0 pointer-events-none">
+        <div class="w-20 h-20 rounded-full bg-[#D2FF3A] text-[#080A0F] flex items-center justify-center shadow-[0_0_50px_rgba(210,255,58,0.8)] group-hover:scale-110 active:scale-95 transition-transform">
+          <span class="material-symbols-outlined text-[44px] font-bold ml-1">play_arrow</span>
+        </div>
+        <span class="mt-4 px-4 py-1.5 rounded-full bg-black/80 border border-white/20 text-white font-mono text-[11px] tracking-wider uppercase font-semibold">
+          Click Anywhere to Resume
+        </span>
+      </div>
+
+      <!-- Master 9:16 Cinema Canvas Stage (1080x1920) -->
+      <div id="cinema-viewport" class="overflow-hidden bg-[#05060A] flex flex-col justify-between">
+
+        <!-- Background Particle Canvas (1080x1920) -->
+        <canvas id="bg-starfield-canvas" width="1080" height="1920" class="absolute inset-0 pointer-events-none z-0"></canvas>
+
+        <!-- Ambient Volumetric Glow -->
+        <div id="ambient-volumetric-glow" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] rounded-full bg-[#D2FF3A]/10 blur-[180px] pointer-events-none transition-all duration-700"></div>
+
+        <!-- Top Watermark Header (In 9:16) -->
+        <div class="relative z-20 w-full px-12 pt-14 flex items-center justify-between text-white/40 font-mono text-xs tracking-widest">
+          <div class="flex items-center gap-2.5">
+            <span class="w-3 h-3 rounded-full bg-[#D2FF3A] shadow-[0_0_10px_#D2FF3A]"></span>
+            <span class="text-white/90 font-bold uppercase tracking-wider text-sm">FOCUSDOT</span>
+          </div>
+          <span id="canvas-timecode" class="text-white/70 text-sm font-semibold">00:00.00</span>
+        </div>
+
+        <!-- ===================================================================
+             SCENE 1: THE SPARK (00.0s – 04.0s)
+             =================================================================== -->
+        <div id="scene-1" class="absolute inset-0 flex flex-col items-center justify-center z-10 px-12 text-center transition-opacity duration-300">
+          <div class="relative flex items-center justify-center my-12">
+            <!-- Pulsing outer ripples -->
+            <div id="spark-ripple-1" class="absolute w-56 h-56 rounded-full border-2 border-[#D2FF3A]/40 transition-transform duration-700"></div>
+            <div id="spark-ripple-2" class="absolute w-96 h-96 rounded-full border border-[#D2FF3A]/25 transition-transform duration-1000"></div>
+            <!-- Central Spark Dot -->
+            <div id="spark-core-dot" class="w-16 h-16 rounded-full bg-[#D2FF3A] glow-lime-lg relative z-10 transition-transform duration-500 shadow-[0_0_60px_#D2FF3A]"></div>
+          </div>
+          <div id="spark-subtitle" class="text-lg font-mono tracking-[0.35em] uppercase text-white/60 transition-opacity duration-700">
+            Genesis • Single Point of Focus
+          </div>
+        </div>
+
+        <!-- ===================================================================
+             SCENE 2: KINETIC TYPOGRAPHY (04.0s – 08.0s)
+             =================================================================== -->
+        <div id="scene-2" class="absolute inset-0 flex flex-col items-center justify-center z-10 opacity-0 pointer-events-none px-12 text-center">
+          <div id="typo-badge" class="mb-10 inline-flex items-center gap-2.5 px-6 py-2.5 rounded-full bg-white/[0.04] border border-white/10 text-white/70 text-sm font-mono tracking-widest uppercase">
+            <span class="w-2 h-2 rounded-full bg-[#D2FF3A]"></span>
+            <span>FocusDot Core Philosophy</span>
+          </div>
+          <h2 id="typo-headline" class="text-7xl font-black text-white tracking-[-0.035em] leading-[1.12] max-w-2xl">
+            Your <br><span class="text-[#D2FF3A] text-glow">attention</span><br> is your greatest asset.
+          </h2>
+          <p id="typo-subheadline" class="mt-10 text-2xl text-white/60 max-w-xl font-light tracking-tight leading-relaxed">
+            Eliminate cognitive friction.<br>Enter frictionless deep flow.
+          </p>
+          <!-- Horizontal Neon Laser Line -->
+          <div id="typo-laser-line" class="mt-14 h-[3px] w-0 bg-gradient-to-r from-transparent via-[#D2FF3A] to-transparent shadow-[0_0_25px_#D2FF3A] transition-all duration-700"></div>
+        </div>
+
+        <!-- ===================================================================
+             SCENE 3: TIMER CORE REVEAL (08.0s – 15.0s)
+             =================================================================== -->
+        <div id="scene-3" class="absolute inset-0 flex flex-col items-center justify-center z-10 opacity-0 pointer-events-none px-10">
+          
+          <div id="timer-stage-card" class="w-full max-w-md rounded-[52px] bg-[#080A0F]/95 border-2 border-white/10 backdrop-blur-2xl p-8 flex flex-col items-center shadow-[0_30px_100px_rgba(0,0,0,0.9)] relative transition-all duration-700">
+            
+            <!-- Top App Header inside card -->
+            <div class="w-full flex items-center justify-between pb-6 border-b border-white/10">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-[#D2FF3A]/15 border border-[#D2FF3A]/30 flex items-center justify-center text-[#D2FF3A]">
+                  <span class="material-symbols-outlined text-[20px]">bolt</span>
+                </div>
+                <div class="flex flex-col">
+                  <span class="text-base font-bold text-white tracking-tight">FocusDot</span>
+                  <span class="text-[10px] font-mono text-white/40 tracking-wider uppercase">Deep Flow Mode</span>
+                </div>
+              </div>
+
+              <!-- Equalizer Audio Capsule -->
+              <div class="h-9 px-3.5 rounded-full bg-white/[0.06] border border-white/10 flex items-center gap-2.5">
+                <div class="flex items-end gap-1 h-5">
+                  <span class="w-[3px] bg-[#D2FF3A] rounded-full eq-bar-1"></span>
+                  <span class="w-[3px] bg-[#D2FF3A] rounded-full eq-bar-2"></span>
+                  <span class="w-[3px] bg-[#D2FF3A] rounded-full eq-bar-3"></span>
+                  <span class="w-[3px] bg-[#D2FF3A] rounded-full eq-bar-4"></span>
+                </div>
+                <span class="text-xs font-medium text-white/80">Alpha Rain</span>
+              </div>
+            </div>
+
+            <!-- Central Cosmic Sphere Graphic & Timer Display -->
+            <div class="relative w-80 h-80 my-8 flex items-center justify-center">
+              <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-[#D2FF3A]/15 via-transparent to-[#D2FF3A]/25 blur-3xl animate-spin" style="animation-duration: 20s;"></div>
+              <div class="absolute inset-3 rounded-full border border-dashed border-[#D2FF3A]/30 animate-spin" style="animation-duration: 40s;"></div>
+              
+              <canvas id="timer-sphere-canvas" width="280" height="280" class="rounded-full shadow-[0_0_60px_rgba(210,255,58,0.4)]"></canvas>
+              
+              <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                <span id="chrono-timer-digits" class="text-7xl font-extrabold text-white font-chrono tracking-tighter drop-shadow-[0_4px_20px_rgba(0,0,0,0.9)]">25:00</span>
+                <span class="text-xs font-semibold text-[#D2FF3A] tracking-widest uppercase mt-2">Pomodoro Flow</span>
+              </div>
+            </div>
+
+            <!-- Controller Action Button -->
+            <div class="w-full flex items-center justify-center pt-2">
+              <div class="w-16 h-16 rounded-full bg-[#D2FF3A] text-[#080A0F] flex items-center justify-center shadow-[0_0_30px_rgba(210,255,58,0.6)]">
+                <span class="material-symbols-outlined text-[32px] font-bold">play_arrow</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Feature Callout Badge in 9:16 -->
+          <div id="callout-vertical" class="mt-8 p-5 rounded-3xl bg-[#080A0F]/90 border border-white/10 backdrop-blur-xl w-full max-w-md shadow-2xl text-center opacity-0 transition-all duration-500">
+            <span class="text-xs font-mono text-[#D2FF3A] tracking-wider uppercase block mb-1">Atmospheric Focus Engine</span>
+            <p class="text-base font-semibold text-white">Audio-reactive cosmic shader designed to induce unbroken concentration.</p>
+          </div>
+        </div>
+
+        <!-- ===================================================================
+             SCENE 4: STUDY PLANNER & HABIT FLOW (15.0s – 21.0s)
+             =================================================================== -->
+        <div id="scene-4" class="absolute inset-0 flex flex-col items-center justify-center z-10 opacity-0 pointer-events-none px-10 space-y-8">
+          
+          <div class="text-center max-w-lg">
+            <span class="text-xs font-mono text-[#D2FF3A] tracking-widest uppercase block mb-2">Cloud Synchronized</span>
+            <h2 class="text-5xl font-black text-white tracking-tight leading-tight">
+              Turn effort into <br><span class="text-[#D2FF3A]">unbreakable momentum</span>.
+            </h2>
+          </div>
+
+          <!-- Real Study Plan Tasks Card -->
+          <div id="planner-card-left" class="p-8 rounded-[44px] bg-[#080A0F]/95 border-2 border-white/10 backdrop-blur-2xl shadow-2xl space-y-4 w-full max-w-md">
+            <div class="flex items-center justify-between pb-3 border-b border-white/10">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-[#D2FF3A]"></span>
+                <h3 class="text-lg font-bold text-white">Today's Focus Blocks</h3>
+              </div>
+              <span class="text-xs font-mono text-[#D2FF3A]">3 Scheduled</span>
+            </div>
+
+            <!-- Task 1 (Checked live during scene) -->
+            <div id="promo-task-1" class="p-4 rounded-2xl bg-[#11141D] border border-white/10 flex items-start gap-3.5 transition-all duration-500">
+              <div id="promo-check-1" class="w-7 h-7 rounded-full border-2 border-white/30 flex items-center justify-center text-transparent transition-all mt-0.5">
+                <span class="material-symbols-outlined text-[16px]">check</span>
+              </div>
+              <div class="flex-1">
+                <div class="flex items-center gap-2">
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#D2FF3A]/15 text-[#D2FF3A] border border-[#D2FF3A]/25">Deep Work</span>
+                  <span id="promo-badge-status-1" class="text-[10px] text-white/50">Upcoming</span>
+                </div>
+                <h4 id="promo-task-title-1" class="text-base font-semibold text-white mt-1">Calculus & Complex Systems</h4>
+                <p class="text-xs text-white/40 mt-0.5">09:15 PM • 45 mins scheduled</p>
+              </div>
+            </div>
+
+            <!-- Task 2 -->
+            <div class="p-4 rounded-2xl bg-[#11141D] border border-white/10 flex items-start gap-3.5">
+              <div class="w-7 h-7 rounded-full border-2 border-white/30 flex items-center justify-center text-transparent mt-0.5">
+                <span class="material-symbols-outlined text-[16px]">check</span>
+              </div>
+              <div class="flex-1">
+                <div class="flex items-center gap-2">
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-500/15 text-cyan-300 border border-cyan-500/25">Engineering</span>
+                  <span class="text-[10px] text-white/50">Upcoming</span>
+                </div>
+                <h4 class="text-base font-semibold text-white mt-1">System Architecture & APIs</h4>
+                <p class="text-xs text-white/40 mt-0.5">10:30 PM • 60 mins</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Metric Badges in 9:16 -->
+          <div class="grid grid-cols-2 gap-4 w-full max-w-md">
+            <div class="p-5 rounded-3xl bg-white/[0.04] border border-white/10 text-center">
+              <span class="text-3xl font-black text-white font-chrono block" id="counter-streak">14 Days</span>
+              <span class="text-xs text-white/50 block mt-1">Active Study Streak</span>
+            </div>
+            <div class="p-5 rounded-3xl bg-white/[0.04] border border-white/10 text-center">
+              <span class="text-3xl font-black text-[#D2FF3A] font-chrono block" id="counter-minutes">245 Mins</span>
+              <span class="text-xs text-white/50 block mt-1">Deep Work Logged</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ===================================================================
+             SCENE 5: FAST CINEMATIC MONTAGE (21.0s – 26.0s)
+             =================================================================== -->
+        <div id="scene-5" class="absolute inset-0 flex flex-col items-center justify-center z-10 opacity-0 pointer-events-none px-10">
+          
+          <div id="montage-text-badge" class="mb-8 text-center">
+            <span class="px-6 py-2.5 rounded-full bg-[#D2FF3A]/15 border border-[#D2FF3A]/30 text-[#D2FF3A] font-mono text-sm uppercase tracking-widest">
+              Available Everywhere • Web & Mobile PWA
+            </span>
+          </div>
+
+          <!-- 3D Tilted Device Mockup Floating in Space -->
+          <div id="montage-device-frame" class="w-[480px] h-[920px] rounded-[60px] bg-[#080A0F] border-[4px] border-white/20 shadow-[0_40px_120px_rgba(210,255,58,0.3)] p-5 flex flex-col justify-between overflow-hidden relative transition-all duration-500">
+            
+            <!-- Dynamic Island Capsule -->
+            <div class="w-full flex justify-center pt-2">
+              <div class="h-8 px-5 rounded-full bg-black border border-white/10 flex items-center gap-2.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-[#D2FF3A] animate-ping"></span>
+                <span class="text-xs font-mono text-white/90">Flow Active • 24:18</span>
+              </div>
+            </div>
+
+            <!-- Screen UI Preview Content -->
+            <div class="flex-1 flex flex-col items-center justify-center space-y-8">
+              <div class="w-56 h-56 rounded-full bg-gradient-to-tr from-[#D2FF3A]/30 to-transparent p-1.5 shadow-[0_0_60px_rgba(210,255,58,0.35)] flex items-center justify-center">
+                <div class="w-full h-full rounded-full bg-[#0C0F16] flex flex-col items-center justify-center">
+                  <span class="text-4xl font-extrabold text-white font-chrono">24:18</span>
+                  <span class="text-xs text-[#D2FF3A] tracking-wider uppercase mt-1 font-semibold">Deep Work</span>
+                </div>
+              </div>
+
+              <!-- Mindset Chips -->
+              <div class="flex items-center gap-2.5">
+                <span class="px-4 py-1.5 rounded-full text-xs font-bold bg-[#D2FF3A] text-[#080A0F]">Deep Focus</span>
+                <span class="px-4 py-1.5 rounded-full text-xs font-medium bg-white/[0.08] text-white/70">Creative</span>
+                <span class="px-4 py-1.5 rounded-full text-xs font-medium bg-white/[0.08] text-white/70">Alpha</span>
+              </div>
+            </div>
+
+            <!-- Bottom Floating Dock -->
+            <div class="w-full h-14 rounded-2xl bg-white/[0.05] border border-white/10 flex items-center justify-around text-white/60">
+              <span class="material-symbols-outlined text-[24px] text-[#D2FF3A]">timer</span>
+              <span class="material-symbols-outlined text-[24px]">calendar_today</span>
+              <span class="material-symbols-outlined text-[24px]">bar_chart</span>
+              <span class="material-symbols-outlined text-[24px]">settings</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===================================================================
+             SCENE 6: LOGO REVEAL & CALL TO ACTION (26.0s – 30.0s)
+             =================================================================== -->
+        <div id="scene-6" class="absolute inset-0 flex flex-col items-center justify-center z-10 opacity-0 pointer-events-none text-center px-10">
+          
+          <!-- Final Radiant Sphere Logo -->
+          <div id="logo-icon-box" class="w-32 h-32 rounded-3xl bg-gradient-to-tr from-[#1E273E] via-[#0F172A] to-[#1E293B] border-2 border-[#D2FF3A] flex items-center justify-center text-[#D2FF3A] glow-lime-lg relative mb-8">
+            <span class="material-symbols-outlined text-[64px]" style="font-variation-settings: 'FILL' 1;">bolt</span>
+            <div class="absolute -bottom-2 -right-2 w-9 h-9 rounded-full bg-[#D2FF3A] border-4 border-[#05060A] flex items-center justify-center">
+              <span class="material-symbols-outlined text-[18px] text-[#080A0F] font-black">check</span>
+            </div>
+          </div>
+
+          <!-- Brand Title -->
+          <h1 id="logo-brand-title" class="text-8xl font-black text-white tracking-[-0.04em]">
+            FocusDot
+          </h1>
+
+          <!-- Tagline -->
+          <p id="logo-tagline" class="text-3xl font-light text-white/80 tracking-wide mt-4">
+            Enter <strong class="text-[#D2FF3A] font-bold">Deep Flow Mode</strong>.
+          </p>
+
+          <!-- Domain CTA Pill -->
+          <div id="logo-domain-pill" class="mt-12 px-8 py-3.5 rounded-full bg-white/[0.08] border border-white/20 text-white font-mono text-base tracking-wider flex items-center gap-3 shadow-2xl">
+            <span class="w-2.5 h-2.5 rounded-full bg-[#D2FF3A] shadow-[0_0_8px_#D2FF3A]"></span>
+            <span>focusdotflow.vercel.app</span>
+          </div>
+        </div>
+
+        <!-- Bottom Footer Watermark (In 9:16) -->
+        <div class="relative z-20 w-full px-12 pb-14 flex items-center justify-between text-white/40 font-mono text-xs tracking-widest">
+          <span>DEEP FLOW MODE</span>
+          <span>9:16 VERTICAL REEL</span>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Studio Playback Bar & Controller -->
+  <footer class="w-full max-w-4xl bg-[#080A0F]/90 backdrop-blur-xl border border-white/10 rounded-2xl p-3.5 mt-1 flex flex-col gap-2.5 shadow-2xl">
+    
+    <!-- Timeline Scrubber -->
+    <div class="w-full flex items-center gap-3">
+      <span id="playback-time" class="font-mono text-xs text-[#D2FF3A] font-semibold w-16 text-right">00:00.0</span>
+      <input type="range" id="timeline-scrubber" min="0" max="30000" step="16" value="0" class="w-full h-1.5 bg-[#181C26] rounded-full appearance-none outline-none cursor-pointer">
+      <span class="font-mono text-xs text-white/40 w-16">00:30.0</span>
+    </div>
+
+    <!-- Playback Controls -->
+    <div class="flex items-center justify-between">
+      
+      <!-- Scene Jump Buttons -->
+      <div class="flex items-center gap-1">
+        <button onclick="seekTo(0)" class="px-2 py-0.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-[10px] font-mono text-white/70 transition">01 Spark</button>
+        <button onclick="seekTo(4000)" class="px-2 py-0.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-[10px] font-mono text-white/70 transition">02 Manifesto</button>
+        <button onclick="seekTo(8000)" class="px-2 py-0.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-[10px] font-mono text-white/70 transition">03 Timer</button>
+        <button onclick="seekTo(15000)" class="px-2 py-0.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-[10px] font-mono text-white/70 transition">04 Planner</button>
+        <button onclick="seekTo(21000)" class="px-2 py-0.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-[10px] font-mono text-white/70 transition">05 Montage</button>
+        <button onclick="seekTo(26000)" class="px-2 py-0.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-[10px] font-mono text-white/70 transition">06 Logo</button>
+      </div>
+
+      <!-- Play / Pause / Replay Buttons -->
+      <div class="flex items-center gap-2.5">
+        <button id="btn-replay" class="w-8 h-8 rounded-xl bg-white/[0.06] hover:bg-white/10 active:scale-95 flex items-center justify-center text-white/80 transition" title="Replay from start">
+          <span class="material-symbols-outlined text-[17px]">replay</span>
+        </button>
+        <button id="btn-play-pause" class="px-4 py-1.5 rounded-xl bg-[#D2FF3A] hover:bg-[#b8e629] text-[#080A0F] font-bold text-xs flex items-center gap-1.5 shadow-[0_0_15px_rgba(210,255,58,0.3)] transition active:scale-95">
+          <span id="play-pause-icon" class="material-symbols-outlined text-[17px]">pause</span>
+          <span id="play-pause-text">Pause</span>
+        </button>
+        <button id="btn-audio-toggle" class="w-8 h-8 rounded-xl bg-white/[0.06] hover:bg-white/10 active:scale-95 flex items-center justify-center text-[#D2FF3A] transition" title="Toggle Synthesized SFX">
+          <span id="audio-icon" class="material-symbols-outlined text-[17px]">volume_up</span>
+        </button>
+      </div>
+
+      <!-- Quality and Codec Info -->
+      <div class="hidden sm:flex text-[10px] font-mono text-white/40 items-center gap-1.5">
+        <span>60 FPS</span>
+        <span>•</span>
+        <span class="text-white/70">9:16 Vertical Master</span>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- =========================================================================
+       AUDIO & ANIMATION CHOREOGRAPHY SCRIPT
+       ========================================================================= -->
+  <script>
+    // 1. Viewport Auto-Scaling (Fit 1080x1920 9:16 into browser window cleanly)
+    const cinemaViewport = document.getElementById('cinema-viewport');
+    const scaleWrapper = document.getElementById('scale-wrapper');
+    const bigPlayOverlay = document.getElementById('big-play-overlay');
+
+    function resizeCinemaStage() {
+      const parentWidth = window.innerWidth * 0.92;
+      const parentHeight = window.innerHeight * 0.70;
+      const scaleX = parentWidth / 1080;
+      const scaleY = parentHeight / 1920;
+      const scale = Math.min(scaleX, scaleY, 0.45); // Limit max scale so full 9:16 rectangle fits inside screen
+
+      cinemaViewport.style.transform = `scale(${scale})`;
+      scaleWrapper.style.width = `${Math.round(1080 * scale)}px`;
+      scaleWrapper.style.height = `${Math.round(1920 * scale)}px`;
+    }
+    window.addEventListener('resize', resizeCinemaStage);
+    resizeCinemaStage();
+
+    // 2. Starfield & Cosmic Particle Background Canvas
+    const bgCanvas = document.getElementById('bg-starfield-canvas');
+    const bgCtx = bgCanvas.getContext('2d');
+    const stars = Array.from({ length: 150 }, () => ({
+      x: Math.random() * 1080,
+      y: Math.random() * 1920,
+      size: Math.random() * 2.2 + 0.6,
+      speed: Math.random() * 0.5 + 0.15,
+      alpha: Math.random() * 0.75 + 0.25
+    }));
+
+    function renderStarfield(time) {
+      bgCtx.clearRect(0, 0, 1080, 1920);
+      bgCtx.fillStyle = '#05060A';
+      bgCtx.fillRect(0, 0, 1080, 1920);
+
+      stars.forEach(s => {
+        s.y -= s.speed;
+        if (s.y < 0) s.y = 1920;
+        bgCtx.fillStyle = `rgba(210, 255, 58, ${s.alpha * (0.6 + 0.4 * Math.sin(time * 0.002 + s.x))})`;
+        bgCtx.beginPath();
+        bgCtx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+        bgCtx.fill();
+      });
+    }
+
+    // 3. Central Cosmic 3D Sphere Renderer (Canvas)
+    const sphereCanvas = document.getElementById('timer-sphere-canvas');
+    const sphereCtx = sphereCanvas.getContext('2d');
+
+    function renderCosmicSphere(elapsed) {
+      const w = sphereCanvas.width;
+      const h = sphereCanvas.height;
+      sphereCtx.clearRect(0, 0, w, h);
+
+      const cx = w / 2;
+      const cy = h / 2;
+      const r = 110;
+
+      // Outer radial aura
+      const grad = sphereCtx.createRadialGradient(cx, cy, 15, cx, cy, r);
+      grad.addColorStop(0, '#FFFFFF');
+      grad.addColorStop(0.3, '#D2FF3A');
+      grad.addColorStop(0.7, '#1E2330');
+      grad.addColorStop(1, '#05060A');
+
+      sphereCtx.fillStyle = grad;
+      sphereCtx.beginPath();
+      sphereCtx.arc(cx, cy, r, 0, Math.PI * 2);
+      sphereCtx.fill();
+
+      // Atmospheric rotating orbital rings
+      const angle = elapsed * 0.0015;
+      sphereCtx.strokeStyle = 'rgba(210, 255, 58, 0.45)';
+      sphereCtx.lineWidth = 2.5;
+      sphereCtx.beginPath();
+      sphereCtx.ellipse(cx, cy, r * 1.15, r * 0.35, angle, 0, Math.PI * 2);
+      sphereCtx.stroke();
+    }
+
+    // 4. Synthesized Cinematic Web Audio Engine
+    let audioCtx = null;
+    let isAudioEnabled = true;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function playCinematicSubBass(freq = 55, duration = 2.5) {
+      if (!isAudioEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(freq * 0.5, ctx.currentTime + duration);
+
+        gain.gain.setValueAtTime(0.4, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + duration);
+      } catch(e) {}
+    }
+
+    function playChime(freq = 880) {
+      if (!isAudioEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.2);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 1.2);
+      } catch(e) {}
+    }
+
+    // 5. Deterministic 30.0s Timeline Director
+    const TOTAL_DURATION_MS = 30000;
+    let currentTimeMs = 0;
+    let isPlaying = true;
+    let lastTimestamp = 0;
+    let lastTriggeredScene = -1;
+
+    // Unlock Web Audio on first user gesture
+    window.addEventListener('pointerdown', () => { getAudioContext(); }, { once: true });
+
+    const scenes = [
+      { id: 'scene-1', name: 'Scene 1: The Spark', start: 0, end: 4000 },
+      { id: 'scene-2', name: 'Scene 2: Manifesto', start: 4000, end: 8000 },
+      { id: 'scene-3', name: 'Scene 3: Timer Reveal', start: 8000, end: 15000 },
+      { id: 'scene-4', name: 'Scene 4: Study Flow', start: 15000, end: 21000 },
+      { id: 'scene-5', name: 'Scene 5: Fast Montage', start: 21000, end: 26000 },
+      { id: 'scene-6', name: 'Scene 6: Logo Reveal', start: 26000, end: 30000 }
+    ];
+
+    const labelSceneName = document.getElementById('label-scene-name');
+    const labelPlaybackTime = document.getElementById('playback-time');
+    const scrubber = document.getElementById('timeline-scrubber');
+    const canvasTimecode = document.getElementById('canvas-timecode');
+
+    function formatTime(ms) {
+      const sec = Math.floor(ms / 1000);
+      const centis = Math.floor((ms % 1000) / 10);
+      return `${String(sec).padStart(2, '0')}:${String(centis).padStart(2, '0')}`;
+    }
+
+    function renderTimeline(t) {
+      renderStarfield(t);
+      renderCosmicSphere(t);
+
+      let activeIndex = scenes.findIndex(s => t >= s.start && t < s.end);
+      if (activeIndex === -1 && t >= 30000) activeIndex = 5;
+
+      if (scenes[activeIndex]) {
+        labelSceneName.textContent = scenes[activeIndex].name;
+      }
+      labelPlaybackTime.textContent = formatTime(t);
+      canvasTimecode.textContent = `00:${formatTime(t)}`;
+      scrubber.value = t;
+
+      // Audio triggers
+      if (activeIndex !== lastTriggeredScene && isPlaying) {
+        lastTriggeredScene = activeIndex;
+        if (activeIndex === 0) playCinematicSubBass(50, 2.5);
+        if (activeIndex === 1) playCinematicSubBass(70, 2.0);
+        if (activeIndex === 2) playChime(660);
+        if (activeIndex === 3) playChime(880);
+        if (activeIndex === 4) playCinematicSubBass(80, 1.5);
+        if (activeIndex === 5) {
+          playCinematicSubBass(45, 3.5);
+          playChime(1100);
+        }
+      }
+
+      // Hide all scenes then animate active
+      scenes.forEach((s, idx) => {
+        const el = document.getElementById(s.id);
+        if (!el) return;
+        if (idx === activeIndex) {
+          el.style.opacity = '1';
+          el.style.pointerEvents = 'auto';
+        } else {
+          el.style.opacity = '0';
+          el.style.pointerEvents = 'none';
+        }
+      });
+
+      // ================= Scene Specific Choreography (9:16 Vertical) =================
+
+      // SCENE 1: The Spark (0s - 4s)
+      if (t < 4000) {
+        const p = t / 4000;
+        const sparkDot = document.getElementById('spark-core-dot');
+        const ripple1 = document.getElementById('spark-ripple-1');
+        const ripple2 = document.getElementById('spark-ripple-2');
+        const sparkSub = document.getElementById('spark-subtitle');
+
+        sparkDot.style.transform = `scale(${0.8 + p * 1.5})`;
+        ripple1.style.transform = `scale(${1.0 + p * 2.8})`;
+        ripple1.style.opacity = `${0.7 - p * 0.4}`;
+        ripple2.style.transform = `scale(${1.2 + p * 3.8})`;
+        ripple2.style.opacity = `${0.5 - p * 0.3}`;
+        sparkSub.style.opacity = `${Math.min(1.0, 0.4 + p * 0.6)}`;
+      }
+
+      // SCENE 2: Kinetic Manifesto (4s - 8s)
+      if (t >= 4000 && t < 8000) {
+        const p = (t - 4000) / 4000;
+        const headline = document.getElementById('typo-headline');
+        const laser = document.getElementById('typo-laser-line');
+        headline.style.transform = `scale(${0.95 + p * 0.08}) rotateX(${(1 - p) * 8}deg)`;
+        laser.style.width = `${p * 480}px`;
+      }
+
+      // SCENE 3: Timer Core Reveal (8s - 15s)
+      if (t >= 8000 && t < 15000) {
+        const p = (t - 8000) / 7000;
+        const timerCard = document.getElementById('timer-stage-card');
+        const callout = document.getElementById('callout-vertical');
+        const digits = document.getElementById('chrono-timer-digits');
+
+        timerCard.style.transform = `perspective(1000px) rotateY(${(1 - p) * -6}deg) scale(${0.96 + p * 0.06})`;
+        
+        if (p > 0.4) {
+          digits.textContent = '24:59';
+          digits.style.color = '#D2FF3A';
+        } else {
+          digits.textContent = '25:00';
+          digits.style.color = '#FFFFFF';
+        }
+
+        if (p > 0.3) callout.style.opacity = '1';
+      }
+
+      // SCENE 4: Study Flow (15s - 21s)
+      if (t >= 15000 && t < 21000) {
+        const p = (t - 15000) / 6000;
+        const check1 = document.getElementById('promo-check-1');
+        const title1 = document.getElementById('promo-task-title-1');
+        const status1 = document.getElementById('promo-badge-status-1');
+
+        if (p > 0.35) {
+          check1.className = 'w-7 h-7 rounded-full bg-[#D2FF3A] flex items-center justify-center text-[#080A0F] font-bold shadow-[0_0_15px_rgba(210,255,58,0.7)] mt-0.5';
+          title1.className = 'text-base font-semibold line-through text-white/50 mt-1';
+          status1.textContent = 'Completed ✓';
+          status1.className = 'text-[10px] text-[#D2FF3A] font-semibold';
+        } else {
+          check1.className = 'w-7 h-7 rounded-full border-2 border-white/30 flex items-center justify-center text-transparent mt-0.5';
+          title1.className = 'text-base font-semibold text-white mt-1';
+          status1.textContent = 'Upcoming';
+        }
+      }
+
+      // SCENE 5: Fast Montage (21s - 26s)
+      if (t >= 21000 && t < 26000) {
+        const p = (t - 21000) / 5000;
+        const frame = document.getElementById('montage-device-frame');
+        frame.style.transform = `perspective(1200px) rotateY(${(p - 0.5) * 16}deg) rotateX(${(0.5 - p) * 10}deg) scale(${0.92 + p * 0.12})`;
+      }
+
+      // SCENE 6: Logo Reveal (26s - 30s)
+      if (t >= 26000) {
+        const p = (t - 26000) / 4000;
+        const logoBox = document.getElementById('logo-icon-box');
+        const title = document.getElementById('logo-brand-title');
+        logoBox.style.transform = `scale(${0.85 + p * 0.22})`;
+        title.style.letterSpacing = `${-0.04 + p * 0.02}em`;
+      }
+    }
+
+    // 6. Playback Engine Loop with Auto-Looping
+    function animationLoop(timestamp) {
+      if (!lastTimestamp) lastTimestamp = timestamp;
+      const delta = timestamp - lastTimestamp;
+      lastTimestamp = timestamp;
+
+      if (isPlaying) {
+        currentTimeMs += delta;
+        if (currentTimeMs >= TOTAL_DURATION_MS) {
+          currentTimeMs = 0; // Auto-loop continuously!
+        }
+      }
+
+      renderTimeline(currentTimeMs);
+      requestAnimationFrame(animationLoop);
+    }
+    requestAnimationFrame(animationLoop);
+
+    function play() {
+      if (currentTimeMs >= TOTAL_DURATION_MS) currentTimeMs = 0;
+      isPlaying = true;
+      document.getElementById('play-pause-icon').textContent = 'pause';
+      document.getElementById('play-pause-text').textContent = 'Pause';
+      bigPlayOverlay.classList.add('opacity-0', 'pointer-events-none');
+      getAudioContext();
+    }
+
+    function pause() {
+      isPlaying = false;
+      document.getElementById('play-pause-icon').textContent = 'play_arrow';
+      document.getElementById('play-pause-text').textContent = 'Play Video';
+      bigPlayOverlay.classList.remove('opacity-0', 'pointer-events-none');
+    }
+
+    function seekTo(ms) {
+      currentTimeMs = Math.min(TOTAL_DURATION_MS, Math.max(0, ms));
+      renderTimeline(currentTimeMs);
+    }
+
+    // Click anywhere on video to toggle Play / Pause
+    scaleWrapper.addEventListener('click', () => {
+      if (isPlaying) pause(); else play();
+    });
+
+    document.getElementById('btn-play-pause').addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (isPlaying) pause(); else play();
+    });
+
+    document.getElementById('btn-replay').addEventListener('click', (e) => {
+      e.stopPropagation();
+      seekTo(0);
+      play();
+    });
+
+    scrubber.addEventListener('input', (e) => {
+      seekTo(parseInt(e.target.value, 10));
+    });
+
+    document.getElementById('btn-audio-toggle').addEventListener('click', (e) => {
+      e.stopPropagation();
+      isAudioEnabled = !isAudioEnabled;
+      document.getElementById('audio-icon').textContent = isAudioEnabled ? 'volume_up' : 'volume_off';
+    });
+
+    // Initial render at t = 0
+    renderTimeline(0);
+
+    // 7. Video Export Recording Engine (MediaRecorder for 9:16)
+    const btnExport = document.getElementById('btn-export-video');
+    const labelExport = document.getElementById('label-export');
+
+    btnExport.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      if (btnExport.getAttribute('disabled') === 'true') return;
+
+      btnExport.setAttribute('disabled', 'true');
+      labelExport.textContent = 'Recording 9:16 Master...';
+
+      seekTo(0);
+      play();
+
+      try {
+        const stream = bgCanvas.captureStream(60);
+
+        const recordedChunks = [];
+        const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+          ? 'video/webm;codecs=vp9'
+          : (MediaRecorder.isTypeSupported('video/mp4') ? 'video/mp4' : 'video/webm');
+
+        const mediaRecorder = new MediaRecorder(stream, {
+          mimeType: mimeType,
+          videoBitsPerSecond: 8000000
+        });
+
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data && e.data.size > 0) {
+            recordedChunks.push(e.data);
+          }
+        };
+
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(recordedChunks, { type: mimeType });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `FocusDot-30s-Launch-9x16-1080p.${mimeType.includes('mp4') ? 'mp4' : 'webm'}`;
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(() => {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            labelExport.textContent = 'Export Complete! ✓';
+            btnExport.removeAttribute('disabled');
+            setTimeout(() => { labelExport.textContent = 'Export 9:16 Video'; }, 3000);
+          }, 100);
+        };
+
+        mediaRecorder.start();
+
+        setTimeout(() => {
+          if (mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
+            pause();
+          }
+        }, 30500);
+
+      } catch(err) {
+        console.error('Recording export error:', err);
+        alert('Browser recording requires desktop Chrome or Edge. Alternatively, screen-capture the 9:16 stage.');
+        labelExport.textContent = 'Export 9:16 Video';
+        btnExport.removeAttribute('disabled');
+      }
+    });
+  </script>
+</body>
+</html>

@@ -29,7 +29,7 @@ const server = http.createServer((req, res) => {
     reqPath = '/index.html';
   }
 
-  const filePath = path.join(PUBLIC_DIR, reqPath);
+  let filePath = path.join(PUBLIC_DIR, reqPath);
 
   // Prevent directory traversal
   if (!filePath.startsWith(PUBLIC_DIR)) {
@@ -38,11 +38,16 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // If path is a directory, look for index.html inside it
+  if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
+    filePath = path.join(filePath, 'index.html');
+  }
+
   fs.stat(filePath, (err, stats) => {
-    // SPA Fallback: if not an exact file, serve index.html
+    // SPA Fallback: if not an exact file, serve root index.html
     if (err || !stats.isFile()) {
       const fallbackPath = path.join(PUBLIC_DIR, 'index.html');
-      res.writeHead(200, { 'Content-Type': 'text/html' });
+      res.writeHead(200, { 'Content-Type': 'text/html', 'Cache-Control': 'no-cache' });
       fs.createReadStream(fallbackPath).pipe(res);
       return;
     }
@@ -50,7 +55,10 @@ const server = http.createServer((req, res) => {
     const ext = path.extname(filePath).toLowerCase();
     const contentType = MIME_TYPES[ext] || 'application/octet-stream';
 
-    res.writeHead(200, { 'Content-Type': contentType });
+    res.writeHead(200, {
+      'Content-Type': contentType,
+      'Cache-Control': 'no-cache, no-store, must-revalidate'
+    });
     const stream = fs.createReadStream(filePath);
     stream.pipe(res);
   });
