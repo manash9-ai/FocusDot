@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FocusDot — Official Product Page | Deep Flow Mode</title>
+<meta name="description" content="FocusDot is a premium student productivity application pairing real-time WebGL cosmic orbs, 40Hz acoustic gamma sync, cognitive state tuning, and study block scheduling.">
+<link rel="icon" type="image/svg+xml" href="/assets/icons/favicon.svg">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#080A0F">
+
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{background:#030508;color:#fff;font-family:'Inter',sans-serif}
+  body{overflow-x:hidden;background:#030508}
+  .font-mono{font-family:'JetBrains Mono',monospace;font-feature-settings:"tnum"1,"zero"1}
+
+  /* ═══ COLOR PALETTE & UTILS ═══ */
+  :root{
+    --lime:#D2FF3A;
+    --lime-glow:rgba(210,255,58,0.45);
+    --dark-bg:#030508;
+    --card-bg:#090C14;
+    --card-border:rgba(255,255,255,0.08);
+  }
+
+  .text-lime{color:#D2FF3A}
+  .bg-lime{background:#D2FF3A}
+  .border-lime{border-color:#D2FF3A}
+
+  /* Glow Effects */
+  .glow-lime{box-shadow:0 0 30px rgba(210,255,58,0.35)}
+  .glow-lime-sm{box-shadow:0 0 14px rgba(210,255,58,0.3)}
+  .glow-text{text-shadow:0 0 30px rgba(210,255,58,0.4)}
+
+  /* Background grid */
+  .bg-grid{
+    background-image:
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size:80px 80px;
+  }
+
+  /* Subtle noise / scanlines */
+  .scanline-bg{
+    background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.04) 2px,rgba(0,0,0,0.04) 4px);
+  }
+
+  /* Glass Cards */
+  .glass-card{
+    background:#080B12;
+    border:1px solid rgba(255,255,255,0.07);
+    border-radius:24px;
+    transition:transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  }
+  .glass-card:hover{
+    border-color:rgba(210,255,58,0.25);
+    box-shadow:0 16px 40px rgba(0,0,0,0.6),0 0 30px rgba(210,255,58,0.06);
+    transform:translateY(-2px);
+  }
+
+  /* Buttons */
+  .btn-primary{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    background:#D2FF3A;color:#080A0F;font-weight:800;font-size:14px;
+    padding:13px 26px;border-radius:14px;text-decoration:none;cursor:pointer;
+    border:none;transition:all 0.2s ease;box-shadow:0 0 25px rgba(210,255,58,0.32);
+    letter-spacing:-0.01em;white-space:nowrap;
+  }
+  .btn-primary:hover{
+    background:#e0ff66;transform:scale(1.02);box-shadow:0 0 35px rgba(210,255,58,0.5);
+  }
+  .btn-secondary{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    background:rgba(255,255,255,0.05);color:#fff;font-weight:600;font-size:14px;
+    padding:13px 24px;border-radius:14px;text-decoration:none;cursor:pointer;
+    border:1px solid rgba(255,255,255,0.12);transition:all 0.2s ease;
+    white-space:nowrap;backdrop-filter:blur(10px);
+  }
+  .btn-secondary:hover{
+    background:rgba(255,255,255,0.1);border-color:rgba(210,255,58,0.3);color:#D2FF3A;
+  }
+
+  /* Badges */
+  .pill-badge{
+    display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;
+    background:rgba(210,255,58,0.08);border:1px solid rgba(210,255,58,0.25);
+    color:#D2FF3A;font-size:11px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;
+  }
+  .pill-dot{width:6px;height:6px;border-radius:50%;background:#D2FF3A;box-shadow:0 0 8px #D2FF3A}
+
+  /* Animations */
+  @keyframes pulseGlow{0%,100%{opacity:0.4;transform:scale(1)}50%{opacity:0.8;transform:scale(1.04)}}
+  .pulse-glow{animation:pulseGlow 4s ease-in-out infinite}
+  @keyframes floatSlow{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+  .float-slow{animation:floatSlow 5s ease-in-out infinite}
+
+  /* Video player wrapper */
+  .player-frame{
+    position:relative;width:100%;border-radius:28px;overflow:hidden;
+    background:#020306;border:2px solid rgba(255,255,255,0.12);
+    box-shadow:0 30px 100px rgba(0,0,0,0.9),0 0 80px rgba(210,255,58,0.12);
+    aspect-ratio:16/9;
+  }
+  .player-overlay{
+    position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(0,0,0,0.3) 0%,rgba(2,3,6,0.85) 100%);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;
+    transition:opacity 0.3s ease;z-index:20;
+  }
+  .player-play-btn{
+    width:84px;height:84px;border-radius:50%;background:#D2FF3A;color:#080A0F;
+    display:flex;align-items:center;justify-content:center;font-size:36px;
+    box-shadow:0 0 45px rgba(210,255,58,0.6);transition:all 0.25s ease;
+  }
+  .player-play-btn:hover{transform:scale(1.1);background:#fff}
+  .play-triangle{width:0;height:0;border-style:solid;border-width:14px 0 14px 22px;border-color:transparent transparent transparent #080A0F;margin-left:4px}
+
+  /* Responsive Mockup Frame */
+  .device-mock{
+    background:#080A0F;border:8px solid #1A1E2B;border-radius:42px;
+    box-shadow:0 25px 70px rgba(0,0,0,0.85),0 0 40px rgba(210,255,58,0.06);
+    overflow:hidden;position:relative;max-width:340px;margin:0 auto;
+  }
+  .device-mock img{width:100%;height:auto;display:block}
+
+  /* Navigation */
+  header{
+    position:sticky;top:0;left:0;right:0;z-index:1000;
+    background:rgba(3,5,8,0.82);backdrop-filter:blur(20px);
+    border-bottom:1px solid rgba(255,255,255,0.07);
+  }
+
+  /* Container */
+  .container{max-width:1240px;margin:0 auto;padding:0 24px}
+  @media(max-width:640px){.container{padding:0 16px}}
+</style>
+</head>
+<body class="bg-grid">
+
+<!-- ===========================================================================
+     1. HEADER / NAVIGATION
+     =========================================================================== -->
+<header>
+  <div class="container" style="display:flex;align-items:center;justify-content:space-between;height:72px">
+    <!-- Brand Logo -->
+    <a href="#" style="display:flex;align-items:center;gap:12px;text-decoration:none;color:#fff">
+      <div style="width:38px;height:38px;border-radius:12px;background:rgba(210,255,58,0.1);border:1px solid rgba(210,255,58,0.3);display:flex;align-items:center;justify-content:center;color:#D2FF3A">
+        <span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 1">bolt</span>
+      </div>
+      <div>
+        <div style="font-size:18px;font-weight:900;letter-spacing:-0.03em;line-height:1">FocusDot</div>
+        <div style="font-size:9.5px;text-transform:uppercase;letter-spacing:0.18em;color:rgba(255,255,255,0.4);margin-top:2px">Deep Flow Mode</div>
+      </div>
+    </a>
+
+    <!-- Desktop Navigation Links -->
+    <nav style="display:none;gap:28px;align-items:center" id="desktop-nav">
+      <a href="#overview" style="color:rgba(255,255,255,0.65);font-size:14px;font-weight:500;text-decoration:none;transition:color 0.2s">Overview</a>
+      <a href="#video" style="color:rgba(255,255,255,0.65);font-size:14px;font-weight:500;text-decoration:none;transition:color 0.2s">Showcase</a>
+      <a href="#features" style="color:rgba(255,255,255,0.65);font-size:14px;font-weight:500;text-decoration:none;transition:color 0.2s">Features</a>
+      <a href="#screenshots" style="color:rgba(255,255,255,0.65);font-size:14px;font-weight:500;text-decoration:none;transition:color 0.2s">Gallery</a>
+      <a href="#download" style="color:rgba(255,255,255,0.65);font-size:14px;font-weight:500;text-decoration:none;transition:color 0.2s">Download</a>
+    </nav>
+
+    <!-- Header Actions -->
+    <div style="display:flex;align-items:center;gap:12px">
+      <button id="header-install-btn" class="btn-secondary" style="padding:9px 18px;font-size:12.5px;display:none">
+        <span class="material-symbols-outlined" style="font-size:18px">download</span>
+        <span>Install App</span>
+      </button>
+      <a href="https://focusdotflow.vercel.app" target="_blank" rel="noopener" class="btn-primary" style="padding:9px 20px;font-size:13px">
+        <span>Open App</span>
+        <span class="material-symbols-outlined" style="font-size:16px">arrow_outward</span>
+      </a>
+      <!-- Mobile menu button -->
+      <button id="mobile-menu-btn" style="background:none;border:none;color:#fff;display:flex;align-items:center;cursor:pointer;padding:6px" aria-label="Toggle navigation">
+        <span class="material-symbols-outlined" style="font-size:26px">menu</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Dropdown Navigation -->
+  <div id="mobile-dropdown" style="display:none;padding:16px 24px 24px;background:#06080F;border-top:1px solid rgba(255,255,255,0.07)">
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <a href="#overview" class="mobile-nav-link" style="color:rgba(255,255,255,0.8);font-size:15px;font-weight:600;text-decoration:none">Overview</a>
+      <a href="#video" class="mobile-nav-link" style="color:rgba(255,255,255,0.8);font-size:15px;font-weight:600;text-decoration:none">Showcase Video</a>
+      <a href="#features" class="mobile-nav-link" style="color:rgba(255,255,255,0.8);font-size:15px;font-weight:600;text-decoration:none">Features</a>
+      <a href="#screenshots" class="mobile-nav-link" style="color:rgba(255,255,255,0.8);font-size:15px;font-weight:600;text-decoration:none">App Screenshots</a>
+      <a href="#download" class="mobile-nav-link" style="color:rgba(255,255,255,0.8);font-size:15px;font-weight:600;text-decoration:none">Download & Install</a>
+      <a href="https://focusdotflow.vercel.app" target="_blank" rel="noopener" class="btn-primary" style="margin-top:8px">Open FocusDot Live App ↗</a>
+    </div>
+  </div>
+</header>
+
+<script>
+  // Show desktop nav above 768px
+  const desktopNav = document.getElementById('desktop-nav');
+  const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+  const mobileDropdown = document.getElementById('mobile-dropdown');
+  function checkWidth(){
+    if(window.innerWidth>=768){
+      desktopNav.style.display='flex';
+      mobileMenuBtn.style.display='none';
+      mobileDropdown.style.display='none';
+    }else{
+      desktopNav.style.display='none';
+      mobileMenuBtn.style.display='flex';
+    }
+  }
+  window.addEventListener('resize', checkWidth);
+  checkWidth();
+
+  mobileMenuBtn.addEventListener('click', ()=>{
+    const isHidden = mobileDropdown.style.display==='none';
+    mobileDropdown.style.display = isHidden ? 'block' : 'none';
+  });
+  document.querySelectorAll('.mobile-nav-link').forEach(link=>{
+    link.addEventListener('click', ()=>{ mobileDropdown.style.display='none'; });
+  });
+</script>
+
+<!-- ===========================================================================
+     2. HERO VIDEO SECTION (THE MAIN ATTRACTION)
+     =========================================================================== -->
+<section id="video" style="padding:60px 0 80px;position:relative;overflow:hidden">
+  <!-- Ambient background glow behind player -->
+  <div style="position:absolute;top:20%;left:50%;transform:translate(-50%,-50%);width:700px;height:400px;background:radial-gradient(circle,rgba(210,255,58,0.12),rgba(16,185,129,0.06),transparent 70%);filter:blur(80px);pointer-events:none;z-index:0"></div>
+
+  <div class="container" style="position:relative;z-index:10;text-align:center">
+    <!-- Eyebrow Badge -->
+    <div style="display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:999px;background:rgba(210,255,58,0.08);border:1px solid rgba(210,255,58,0.25);margin-bottom:20px">
+      <div class="pill-dot"></div>
+      <span style="font-size:11px;font-weight:700;color:#D2FF3A;text-transform:uppercase;letter-spacing:0.18em">Official Product Showcase</span>
+      <span style="font-size:10px;padding:2px 6px;border-radius:4px;background:#D2FF3A;color:#080A0F;font-weight:800">1080P 60FPS</span>
+    </div>
+
+    <!-- Main Headline -->
+    <h1 style="font-size:clamp(36px,6vw,72px);font-weight:900;letter-spacing:-0.04em;line-height:1.05;margin-bottom:18px">
+      Enter Deep Flow.<br>
+      <span style="background:linear-gradient(135deg,#fff 0%,rgba(255,255,255,0.85) 50%,#D2FF3A 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">
+        Focus on what matters.
+      </span>
+    </h1>
+
+    <!-- Subtitle -->
+    <p style="font-size:clamp(15px,2vw,19px);line-height:1.6;color:rgba(255,255,255,0.6);max-width:680px;margin:0 auto 36px">
+      The student productivity engine designed to eliminate distraction, enter deep flow states with real-time WebGL cosmic orbs, and master every study block.
+    </p>
+
+    <!-- Video Mode Selector -->
+    <div style="display:inline-flex;align-items:center;background:#090D17;border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:4px;gap:4px;margin-bottom:24px">
+      <button id="btn-mode-169" style="padding:8px 18px;border-radius:10px;border:none;background:#D2FF3A;color:#080A0F;font-weight:800;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.2s">
+        <span class="material-symbols-outlined" style="font-size:16px">desktop_windows</span>
+        <span>16:9 Landscape Commercial</span>
+      </button>
+      <button id="btn-mode-916" style="padding:8px 18px;border-radius:10px;border:none;background:transparent;color:rgba(255,255,255,0.6);font-weight:600;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.2s">
+        <span class="material-symbols-outlined" style="font-size:16px">smartphone</span>
+        <span>9:16 Mobile Story</span>
+      </button>
+    </div>
+
+    <!-- ═══ RESPONSIVE VIDEO PLAYER FRAME ═══ -->
+    <div style="max-width:1080px;margin:0 auto">
+      <div class="player-frame" id="player-container">
+        <!-- Interactive Showcase Iframe -->
+        <iframe id="showcase-iframe" src="/promo/showcase.html" style="width:100%;height:100%;border:none;display:block" allow="autoplay; fullscreen" loading="lazy" title="FocusDot Official Product Showcase Video"></iframe>
+
+        <!-- Attractive Initial Play Overlay (Click to activate audio & focus) -->
+        <div class="player-overlay" id="player-overlay">
+          <div class="player-play-btn" id="overlay-play-btn" title="Play Video with Audio">
+            <div class="play-triangle"></div>
+          </div>
+          <div style="margin-top:20px;text-align:center">
+            <div style="font-size:19px;font-weight:800;letter-spacing:-0.02em;color:#fff">Watch Product Showcase</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:4px">58 Seconds • WebGL Raymarched Spheres • Procedural Audio Engine</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Player Controls Ribbon -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:#080A12;border:1px solid rgba(255,255,255,0.08);border-top:none;border-radius:0 0 20px 20px;font-size:12px;color:rgba(255,255,255,0.5)">
+        <div style="display:flex;align-items:center;gap:12px">
+          <span style="display:flex;align-items:center;gap:5px;color:#D2FF3A;font-weight:700">
+            <span class="material-symbols-outlined" style="font-size:16px">hd</span>
+            <span>1920 × 1080 Native</span>
+          </span>
+          <span style="opacity:0.3">•</span>
+          <span>Zero external video lag (WebGL Native Engine)</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <button id="player-fullscreen-btn" style="background:none;border:none;color:rgba(255,255,255,0.7);cursor:pointer;display:flex;align-items:center;gap:4px;font-size:12px">
+            <span class="material-symbols-outlined" style="font-size:17px">fullscreen</span>
+            <span>Fullscreen</span>
+          </button>
+          <a href="/promo/showcase.html" target="_blank" rel="noopener" style="color:rgba(255,255,255,0.7);text-decoration:none;display:flex;align-items:center;gap:4px">
+            <span class="material-symbols-outlined" style="font-size:17px">open_in_new</span>
+            <span>Open Standalone</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick CTAs below video -->
+    <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-top:36px;flex-wrap:wrap">
+      <a href="https://focusdotflow.vercel.app" target="_blank" rel="noopener" class="btn-primary" style="padding:15px 32px;font-size:15px">
+        <span class="material-symbols-outlined" style="font-size:20px;font-variation-settings:'FILL' 1">bolt</span>
+        <span>Launch FocusDot Live App</span>
+      </a>
+      <a href="#download" class="btn-secondary" style="padding:15px 28px;font-size:15px">
+        <span class="material-symbols-outlined" style="font-size:20px">install_mobile</span>
+        <span>Download & Install PWA</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Video player mode switcher (16:9 vs 9:16)
+  const btn169 = document.getElementById('btn-mode-169');
+  const btn916 = document.getElementById('btn-mode-916');
+  const iframe = document.getElementById('showcase-iframe');
+  const playerContainer = document.getElementById('player-container');
+  const overlay = document.getElementById('player-overlay');
+  const fsBtn = document.getElementById('player-fullscreen-btn');
+
+  overlay.addEventListener('click', () => {
+    overlay.style.opacity = '0';
+    setTimeout(() => { overlay.style.display = 'none'; }, 300);
+    // Notify iframe to play with audio
+    try {
+      iframe.contentWindow.postMessage('play', '*');
+    } catch(e){}
+  });
+
+  btn169.addEventListener('click', () => {
+    btn169.style.background = '#D2FF3A'; btn169.style.color = '#080A0F'; btn169.style.fontWeight = '800';
+    btn916.style.background = 'transparent'; btn916.style.color = 'rgba(255,255,255,0.6)'; btn916.style.fontWeight = '600';
+    playerContainer.style.aspectRatio = '16/9';
+    playerContainer.style.maxWidth = '100%';
+    iframe.src = '/promo/showcase.html';
+  });
+
+  btn916.addEventListener('click', () => {
+    btn916.style.background = '#D2FF3A'; btn916.style.color = '#080A0F'; btn916.style.fontWeight = '800';
+    btn169.style.background = 'transparent'; btn169.style.color = 'rgba(255,255,255,0.6)'; btn169.style.fontWeight = '600';
+    playerContainer.style.aspectRatio = '9/16';
+    playerContainer.style.maxWidth = '420px';
+    playerContainer.style.margin = '0 auto';
+    iframe.src = '/promo/index.html';
+  });
+
+  fsBtn.addEventListener('click', () => {
+    if (!document.fullscreenElement) {
+      playerContainer.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen().catch(() => {});
+    }
+  });
+</script>
+
+<!-- ===========================================================================
+     3. ABOUT FOCUSDOT
+     =========================================================================== -->
+<section id="overview" style="padding:90px 0;background:#05070D;border-top:1px solid rgba(255,255,255,0.06);border-bottom:1px solid rgba(255,255,255,0.06)">
+  <div class="container">
+    <div style="text-align:center;max-width:760px;margin:0 auto 60px">
+      <div class="pill-badge" style="margin-bottom:14px">
+        <div class="pill-dot"></div>
+        <span>The Philosophy</span>
+      </div>
+      <h2 style="font-size:clamp(30px,4.5vw,52px);font-weight:900;letter-spacing:-0.035em;line-height:1.1;margin-bottom:18px">
+        Traditional timers count seconds.<br>
+        <span class="text-lime">FocusDot commands your attention.</span>
+      </h2>
+      <p style="font-size:16.5px;line-height:1.7;color:rgba(255,255,255,0.6)">
+        Most productivity tools are passive clocks that leave you vulnerable to fatigue and distraction. FocusDot is an active attention control cockpit that pairs real-time WebGL particle bio-feedback with 40Hz acoustic gamma sync, cognitive focus tuning, and structured study block execution.
+      </p>
+    </div>
+
+    <!-- 4 Value Pillars -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px">
+      <!-- Pillar 1 -->
+      <div class="glass-card" style="padding:32px 28px">
+        <div style="width:48px;height:48px;border-radius:14px;background:rgba(210,255,58,0.1);border:1px solid rgba(210,255,58,0.25);display:flex;align-items:center;justify-content:center;color:#D2FF3A;margin-bottom:20px">
+          <span class="material-symbols-outlined" style="font-size:26px">cyclone</span>
+        </div>
+        <h3 style="font-size:18px;font-weight:800;letter-spacing:-0.02em;margin-bottom:8px">Raymarched Cosmic Orb</h3>
+        <p style="font-size:14px;line-height:1.65;color:rgba(255,255,255,0.5)">
+          A live WebGL particle nebula rendered directly in your browser. Its swirling momentum reflects your focus intensity across 5 chromatic themes.
+        </p>
+      </div>
+
+      <!-- Pillar 2 -->
+      <div class="glass-card" style="padding:32px 28px">
+        <div style="width:48px;height:48px;border-radius:14px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);display:flex;align-items:center;justify-content:center;color:#10B981;margin-bottom:20px">
+          <span class="material-symbols-outlined" style="font-size:26px">graphic_eq</span>
+        </div>
+        <h3 style="font-size:18px;font-weight:800;letter-spacing:-0.02em;margin-bottom:8px">40Hz Gamma Soundscape</h3>
+        <p style="font-size:14px;line-height:1.65;color:rgba(255,255,255,0.5)">
+          Scientifically tuned 40Hz binaural beats, calming rain, ambient cafe, and sub-harmonic drones that lock your neural rhythm into deep flow.
+        </p>
+      </div>
+
+      <!-- Pillar 3 -->
+      <div class="glass-card" style="padding:32px 28px">
+        <div style="width:48px;height:48px;border-radius:14px;background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.25);display:flex;align-items:center;justify-content:center;color:#A855F7;margin-bottom:20px">
+          <span class="material-symbols-outlined" style="font-size:26px">psychology</span>
+        </div>
+        <h3 style="font-size:18px;font-weight:800;letter-spacing:-0.02em;margin-bottom:8px">Cognitive State Tuning</h3>
+        <p style="font-size:14px;line-height:1.65;color:rgba(255,255,255,0.5)">
+          Assess your mental energy across 5 states—from Brain Fog to Peak Flow—and receive real-time tactical prompts to conquer study friction.
+        </p>
+      </div>
+
+      <!-- Pillar 4 -->
+      <div class="glass-card" style="padding:32px 28px">
+        <div style="width:48px;height:48px;border-radius:14px;background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.25);display:flex;align-items:center;justify-content:center;color:#38BDF8;margin-bottom:20px">
+          <span class="material-symbols-outlined" style="font-size:26px">assignment_turned_in</span>
+        </div>
+        <h3 style="font-size:18px;font-weight:800;letter-spacing:-0.02em;margin-bottom:8px">Curriculum Block Planning</h3>
+        <p style="font-size:14px;line-height:1.65;color:rgba(255,255,255,0.5)">
+          Schedule tasks by subject, topic, and exact time window. Keep tabs on what is in progress, upcoming, and finished.
+        </p>
+      </div>
+    </div>
+
+    <!-- Stat Highlights Bar -->
+    <div class="glass-card" style="margin-top:40px;padding:28px 36px;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:24px;text-align:center">
+      <div>
+        <div class="font-mono text-lime" style="font-size:36px;font-weight:900;line-height:1">40Hz</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.45);margin-top:6px;text-transform:uppercase;letter-spacing:0.08em;font-weight:600">Gamma Acoustic Wave</div>
+      </div>
+      <div>
+        <div class="font-mono" style="font-size:36px;font-weight:900;color:#fff;line-height:1">5 Themes</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.45);margin-top:6px;text-transform:uppercase;letter-spacing:0.08em;font-weight:600">Raymarched Shaders</div>
+      </div>
+      <div>
+        <div class="font-mono text-lime" style="font-size:36px;font-weight:900;line-height:1">94%</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.45);margin-top:6px;text-transform:uppercase;letter-spacing:0.08em;font-weight:600">Deep Flow Retention</div>
+      </div>
+      <div>
+        <div class="font-mono" style="font-size:36px;font-weight:900;color:#fff;line-height:1">100% Offline</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.45);margin-top:6px;text-transform:uppercase;letter-spacing:0.08em;font-weight:600">Private PWA Storage</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===========================================================================
+     4. FEATURES SHOWCASE (USING ACTUAL SCREENSHOTS & ASSETS)
+     =========================================================================== -->
+<section id="features" style="padding:100px 0">
+  <div class="container">
+    <div style="text-align:center;max-width:720px;margin:0 auto 70px">
+      <div class="pill-badge" style="margin-bottom:14px">
+        <div class="pill-dot"></div>
+        <span>Feature Breakdown</span>
+      </div>
+      <h2 style="font-size:clamp(30px,4.5vw,50px);font-weight:900;letter-spacing:-0.035em;line-height:1.1;margin-bottom:16px">
+        Engineered for deep study.<br>
+        <span class="text-lime">Every screen verified.</span>
+      </h2>
+      <p style="font-size:16px;color:rgba(255,255,255,0.55)">
+        Inspect the real interface of FocusDot. No mockups or fake concepts—everything you see here is operational in the application right now.
+      </p>
+    </div>
+
+    <!-- Feature 1: Timer & Cosmic Orb -->
+    <div style="display:flex;align-items:center;gap:60px;margin-bottom:110px;flex-wrap:wrap">
+      <div style="flex:1;min-width:300px">
+        <div class="pill-badge" style="margin-bottom:12px">01 • Core Experience</div>
+        <h3 style="font-size:clamp(26px,3.5vw,42px);font-weight:900;letter-spacing:-0.03em;line-height:1.1;margin-bottom:18px">
+          The Cosmic Orb Timer &<br><span class="text-lime">5 Chromatic Worlds.</span>
+        </h3>
+        <p style="font-size:15.5px;line-height:1.7;color:rgba(255,255,255,0.6);margin-bottom:20px">
+          Choose between <strong>25m Pomodoro</strong>, <strong>30m Deep Work</strong>, and <strong>45m Exam Prep</strong> presets. The center of the screen features a live WebGL raymarched fluid particle sphere with optical glass rim, specular Fresnel highlights, and real-time audio reactivity.
+        </p>
+        <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:28px">
+          <div style="display:flex;align-items:center;gap:10px;font-size:14px;color:rgba(255,255,255,0.75)">
+            <span class="material-symbols-outlined text-lime" style="font-size:18px">check_circle</span>
+            <span>5 Dynamic Themes: Bioluminescent, Emerald, Cyber Aurora, Crimson, Amethyst</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:14px;color:rgba(255,255,255,0.75)">
+            <span class="material-symbols-outlined text-lime" style="font-size:18px">check_circle</span>
+            <span>Daily Consistency Tracker with 14-Day Streak badge</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:14px;color:rgba(255,255,255,0.75)">
+            <span class="material-symbols-outlined text-lime" style="font-size:18px">check_circle</span>
+            <span>+5m Quick Extension and Instant Reset controls</span>
+          </div>
+        </div>
+        <!-- Orb theme preview chips -->
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <div style="padding:6px 12px;border-radius:999px;background:rgba(210,255,58,0.12);border:1px solid rgba(210,255,58,0.3);font-size:11px;font-weight:700;color:#D2FF3A">Bioluminescent</div>
+          <div style="padding:6px 12px;border-radius:999px;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);font-size:11px;font-weight:700;color:#10B981">Emerald Focus</div>
+          <div style="padding:6px 12px;border-radius:999px;background:rgba(0,245,255,0.12);border:1px solid rgba(0,245,255,0.3);font-size:11px;font-weight:700;color:#00F5FF">Cyber Aurora</div>
+          <div style="padding:6px 12px;border-radius:999px;background:rgba(255,42,85,0.12);border:1px solid rgba(255,42,85,0.3);font-size:11px;font-weight:700;color:#FF2A55">Crimson Flare</div>
+          <div style="padding:6px 12px;border-radius:999px;background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.3);font-size:11px;font-weight:700;color:#A855F7">Cosmic Amethyst</div>
+        </div>
+      </div>
+      <div style="flex:1;min-width:300px;display:flex;justify-content:center">
+        <div class="device-mock float-slow">
+          <img src="/assets/screenshots/timer_screen.png" alt="FocusDot Timer Screen Screenshot" loading="lazy">
+        </div>
+      </div>
+    </div>
+
+    <!-- Feature 2: Daily Planner & Mental State -->
+    <div style="display:flex;align-items:center;gap:60px;margin-bottom:110px;flex-wrap:wrap-reverse">
+      <div style="flex:1;min-width:300px;display:flex;justify-content:center">
+        <div class="device-mock">
+          <img src="/assets/screenshots/daily_planner.png" alt="FocusDot Daily Planner Screenshot" loading="lazy">
+        </div>
+      </div>
+      <div style="flex:1;min-width:300px">
+        <div class="pill-badge" style="margin-bottom:12px">02 • Cognitive Health</div>
+        <h3 style="font-size:clamp(26px,3.5vw,42px);font-weight:900;letter-spacing:-0.03em;line-height:1.1;margin-bottom:18px">
+          Daily Planner &<br><span class="text-lime">Cognitive State Tuning.</span>
+        </h3>
+        <p style="font-size:15.5px;line-height:1.7;color:rgba(255,255,255,0.6);margin-bottom:20px">
+          Check in on your mental baseline with 5 cognitive states: <strong>Brain Fog</strong>, <strong>Restless</strong>, <strong>Balanced</strong>, <strong>In Flow</strong>, and <strong>Peak</strong>. FocusDot adapts its tactical guidance to your mental state.
+        </p>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;gap:10px;font-size:14px;color:rgba(255,255,255,0.75)">
+            <span class="material-symbols-outlined text-lime" style="font-size:18px">check_circle</span>
+            <span>Sleep Target Ring (6.5/8h goal with quick ±0.5h adjuster)</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:14px;color:rgba(255,255,255,0.75)">
+            <span class="material-symbols-outlined text-lime" style="font-size:18px">check_circle</span>
+            <span>Hydration Logger (5/8 glasses, 1,250ml logged with +250ml tap)</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:14px;color:rgba(255,255,255,0.75)">
+            <span class="material-symbols-outlined text-lime" style="font-size:18px">check_circle</span>
+            <span>Weekly Focus Schedule strip with session dots and Level 8 Flow progress</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feature 3: Study Plan & Insights -->
+    <div style="display:flex;align-items:center;gap:60px;flex-wrap:wrap">
+      <div style="flex:1;min-width:300px">
+        <div class="pill-badge" style="margin-bottom:12px">03 • Execution & Insights</div>
+        <h3 style="font-size:clamp(26px,3.5vw,42px);font-weight:900;letter-spacing:-0.03em;line-height:1.1;margin-bottom:18px">
+          Today's Study Plan &<br><span class="text-lime">Deep Flow Analytics.</span>
+        </h3>
+        <p style="font-size:15.5px;line-height:1.7;color:rgba(255,255,255,0.6);margin-bottom:20px">
+          Plan topics and finish one block at a time. Track your daily goal progress (3h 45m of 5h), weekly consistency streaks, and review deep session recordings like <em>Jetpack Compose Architecture</em> and <em>System Design</em>.
+        </p>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;gap:10px;font-size:14px;color:rgba(255,255,255,0.75)">
+            <span class="material-symbols-outlined text-lime" style="font-size:18px">check_circle</span>
+            <span>Scheduled blocks with In Progress, Upcoming, and Completed states</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:14px;color:rgba(255,255,255,0.75)">
+            <span class="material-symbols-outlined text-lime" style="font-size:18px">check_circle</span>
+            <span>94% Deep Flow Rate and session volume metrics</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:14px;color:rgba(255,255,255,0.75)">
+            <span class="material-symbols-outlined text-lime" style="font-size:18px">check_circle</span>
+            <span>Interactive daily timeline showing completed hours across Mon–Sun</span>
+          </div>
+        </div>
+      </div>
+      <div style="flex:1;min-width:300px;display:flex;justify-content:center">
+        <div class="device-mock float-slow">
+          <img src="/assets/screenshots/study_plan.png" alt="FocusDot Study Plan Screenshot" loading="lazy">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===========================================================================
+     SCREENSHOTS GALLERY
+     =========================================================================== -->
+<section id="screenshots" style="padding:90px 0;background:#05070D;border-top:1px solid rgba(255,255,255,0.06);border-bottom:1px solid rgba(255,255,255,0.06)">
+  <div class="container">
+    <div style="text-align:center;max-width:680px;margin:0 auto 50px">
+      <div class="pill-badge" style="margin-bottom:12px">
+        <div class="pill-dot"></div>
+        <span>Visual Ground Truth</span>
+      </div>
+      <h2 style="font-size:clamp(28px,4vw,46px);font-weight:900;letter-spacing:-0.03em;line-height:1.1;margin-bottom:14px">
+        The FocusDot Gallery
+      </h2>
+      <p style="font-size:15.5px;color:rgba(255,255,255,0.55)">
+        Captured directly from live user sessions inside the application.
+      </p>
+    </div>
+
+    <!-- Gallery Grid -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px">
+      <!-- Screenshot 1 -->
+      <div class="glass-card" style="padding:16px;overflow:hidden">
+        <div style="border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);background:#020306">
+          <img src="/assets/screenshots/timer_screen.png" alt="FocusDot Timer Interface" style="width:100%;height:auto;display:block" loading="lazy">
+        </div>
+        <div style="padding:14px 6px 4px">
+          <div style="font-size:14px;font-weight:800;color:#fff">Cosmic Orb Timer</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.45);margin-top:2px">Bioluminescent Flow theme • 25:00 Pomodoro</div>
+        </div>
+      </div>
+
+      <!-- Screenshot 2 -->
+      <div class="glass-card" style="padding:16px;overflow:hidden">
+        <div style="border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);background:#020306">
+          <img src="/assets/screenshots/daily_planner.png" alt="FocusDot Daily Planner" style="width:100%;height:auto;display:block" loading="lazy">
+        </div>
+        <div style="padding:14px 6px 4px">
+          <div style="font-size:14px;font-weight:800;color:#fff">Daily Planner & Cognitive States</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.45);margin-top:2px">Swati session • Level 8 Flow • Sleep & Hydration</div>
+        </div>
+      </div>
+
+      <!-- Screenshot 3 -->
+      <div class="glass-card" style="padding:16px;overflow:hidden">
+        <div style="border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);background:#020306">
+          <img src="/assets/screenshots/study_plan.png" alt="FocusDot Study Plan" style="width:100%;height:auto;display:block" loading="lazy">
+        </div>
+        <div style="padding:14px 6px 4px">
+          <div style="font-size:14px;font-weight:800;color:#fff">Curriculum Task Scheduling</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.45);margin-top:2px">Chemistry, Maths, Physics blocks with status tags</div>
+        </div>
+      </div>
+
+      <!-- Screenshot 4 -->
+      <div class="glass-card" style="padding:16px;overflow:hidden">
+        <div style="border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);background:#020306">
+          <img src="/assets/screenshots/soundscape_deck.png" alt="FocusDot Soundscape Deck" style="width:100%;height:auto;display:block" loading="lazy">
+        </div>
+        <div style="padding:14px 6px 4px">
+          <div style="font-size:14px;font-weight:800;color:#fff">40Hz Binaural Beats Deck</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.45);margin-top:2px">Gamma wave synchronization & ambient chips</div>
+        </div>
+      </div>
+
+      <!-- Screenshot 5 -->
+      <div class="glass-card" style="padding:16px;overflow:hidden">
+        <div style="border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);background:#020306">
+          <img src="/assets/screenshots/orb_amethyst.jpg" alt="FocusDot Cosmic Amethyst Sphere" style="width:100%;height:auto;display:block" loading="lazy">
+        </div>
+        <div style="padding:14px 6px 4px">
+          <div style="font-size:14px;font-weight:800;color:#A855F7">Cosmic Amethyst Sphere</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.45);margin-top:2px">Deep purple & fuchsia raymarched particle shader</div>
+        </div>
+      </div>
+
+      <!-- Screenshot 6 -->
+      <div class="glass-card" style="padding:16px;overflow:hidden">
+        <div style="border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);background:#020306">
+          <img src="/assets/screenshots/orb_crimson.jpg" alt="FocusDot Crimson Flare Sphere" style="width:100%;height:auto;display:block" loading="lazy">
+        </div>
+        <div style="padding:14px 6px 4px">
+          <div style="font-size:14px;font-weight:800;color:#FF2A55">Crimson Flare Sphere</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.45);margin-top:2px">Red & amber volcanic intensity shader for exam prep</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===========================================================================
+     5. DOWNLOAD SECTION (VERIFIED & AVAILABLE FORMATS ONLY)
+     =========================================================================== -->
+<section id="download" style="padding:100px 0">
+  <div class="container">
+    <div style="text-align:center;max-width:700px;margin:0 auto 60px">
+      <div class="pill-badge" style="margin-bottom:12px">
+        <div class="pill-dot"></div>
+        <span>Verified Releases</span>
+      </div>
+      <h2 style="font-size:clamp(30px,4.5vw,50px);font-weight:900;letter-spacing:-0.035em;line-height:1.1;margin-bottom:16px">
+        Get FocusDot on Your Device
+      </h2>
+      <p style="font-size:16px;color:rgba(255,255,255,0.55)">
+        Instant installation via progressive web standards. Works offline, runs at 60fps, and respects your privacy.
+      </p>
+    </div>
+
+    <!-- Download Options Grid -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:28px;max-width:1080px;margin:0 auto">
+      <!-- Option 1: Installable PWA (Available) -->
+      <div class="glass-card" style="padding:36px 30px;display:flex;flex-direction:column;justify-content:space-between;border-color:rgba(210,255,58,0.35);background:linear-gradient(180deg,rgba(210,255,58,0.04) 0%,#080B12 100%)">
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+            <div style="width:52px;height:52px;border-radius:16px;background:rgba(210,255,58,0.12);border:1px solid rgba(210,255,58,0.3);display:flex;align-items:center;justify-content:center;color:#D2FF3A">
+              <span class="material-symbols-outlined" style="font-size:28px">install_mobile</span>
+            </div>
+            <span style="font-size:11px;font-weight:800;padding:4px 10px;border-radius:999px;background:#D2FF3A;color:#080A0F;text-transform:uppercase">Available Now</span>
+          </div>
+          <h3 style="font-size:22px;font-weight:900;letter-spacing:-0.02em;margin-bottom:8px">Installable PWA App</h3>
+          <p style="font-size:13.5px;line-height:1.6;color:rgba(255,255,255,0.55);margin-bottom:20px">
+            Install FocusDot directly to your device home screen or taskbar. Runs full-screen without browser UI, works 100% offline with registered service worker.
+          </p>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;font-size:13px;color:rgba(255,255,255,0.7)">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span class="material-symbols-outlined text-lime" style="font-size:16px">check</span>
+              <span>Supported on: Android, Windows 11/10, macOS, iOS, Linux</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span class="material-symbols-outlined text-lime" style="font-size:16px">check</span>
+              <span>Ultra-fast: &lt; 2MB storage, zero background tracking</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span class="material-symbols-outlined text-lime" style="font-size:16px">check</span>
+              <span>Full offline caching with Service Worker (<code style="color:#D2FF3A">sw.js</code>)</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <button id="pwa-install-btn" class="btn-primary" style="width:100%;font-size:15px;padding:14px 20px">
+            <span class="material-symbols-outlined" style="font-size:20px">download</span>
+            <span>Install FocusDot PWA</span>
+          </button>
+          <div id="pwa-install-msg" style="font-size:11.5px;color:rgba(255,255,255,0.4);text-align:center;margin-top:8px">
+            Tap button to install or use browser menu "Add to Home Screen"
+          </div>
+        </div>
+      </div>
+
+      <!-- Option 2: Live Web App (Direct Access) -->
+      <div class="glass-card" style="padding:36px 30px;display:flex;flex-direction:column;justify-content:space-between">
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+            <div style="width:52px;height:52px;border-radius:16px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;color:#fff">
+              <span class="material-symbols-outlined" style="font-size:28px">language</span>
+            </div>
+            <span style="font-size:11px;font-weight:800;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.8);text-transform:uppercase">Zero Install</span>
+          </div>
+          <h3 style="font-size:22px;font-weight:900;letter-spacing:-0.02em;margin-bottom:8px">Instant Web Access</h3>
+          <p style="font-size:13.5px;line-height:1.6;color:rgba(255,255,255,0.55);margin-bottom:20px">
+            Launch directly in Chrome, Edge, Safari, Brave or Firefox. No download required. Cloud sync ready.
+          </p>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;font-size:13px;color:rgba(255,255,255,0.7)">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span class="material-symbols-outlined text-lime" style="font-size:16px">check</span>
+              <span>URL: <a href="https://focusdotflow.vercel.app" style="color:#D2FF3A;text-decoration:none">focusdotflow.vercel.app</a></span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span class="material-symbols-outlined text-lime" style="font-size:16px">check</span>
+              <span>Fast Edge CDN deployment via Vercel</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span class="material-symbols-outlined text-lime" style="font-size:16px">check</span>
+              <span>Supabase authentication & real-time sync</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <a href="https://focusdotflow.vercel.app" target="_blank" rel="noopener" class="btn-secondary" style="width:100%;font-size:15px;padding:14px 20px">
+            <span>Launch Web App</span>
+            <span class="material-symbols-outlined" style="font-size:18px">arrow_outward</span>
+          </a>
+          <div style="font-size:11.5px;color:rgba(255,255,255,0.4);text-align:center;margin-top:8px">
+            Opens deployed app in a new tab
+          </div>
+        </div>
+      </div>
+
+      <!-- Option 3: Android APK Verified Status -->
+      <div class="glass-card" style="padding:36px 30px;display:flex;flex-direction:column;justify-content:space-between">
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+            <div style="width:52px;height:52px;border-radius:16px;background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.25);display:flex;align-items:center;justify-content:center;color:#38BDF8">
+              <span class="material-symbols-outlined" style="font-size:28px">android</span>
+            </div>
+            <span style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;background:rgba(56,189,248,0.12);color:#38BDF8;text-transform:uppercase">WebAPK Supported</span>
+          </div>
+          <h3 style="font-size:22px;font-weight:900;letter-spacing:-0.02em;margin-bottom:8px">Android Device Setup</h3>
+          <p style="font-size:13.5px;line-height:1.6;color:rgba(255,255,255,0.55);margin-bottom:20px">
+            FocusDot installs natively on Android via WebAPK standards. Standalone Google Play Store APK is on the roadmap.
+          </p>
+          <div style="background:#04060B;border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:14px;font-size:12.5px;color:rgba(255,255,255,0.65);line-height:1.6;margin-bottom:24px">
+            <div style="font-weight:700;color:#fff;margin-bottom:4px">How to install on Android:</div>
+            1. Open <code style="color:#D2FF3A">focusdotflow.vercel.app</code> in Chrome<br>
+            2. Tap Menu (<span style="color:#fff;font-weight:700">⋮</span>) → <strong>Add to Home screen</strong><br>
+            3. Tap <strong>Install</strong> — it appears in your app drawer!
+          </div>
+        </div>
+        <div>
+          <a href="https://focusdotflow.vercel.app" target="_blank" rel="noopener" class="btn-secondary" style="width:100%;font-size:14px;padding:14px 20px">
+            <span class="material-symbols-outlined" style="font-size:18px">android</span>
+            <span>Open Android PWA</span>
+          </a>
+          <div style="font-size:11.5px;color:rgba(255,255,255,0.4);text-align:center;margin-top:8px">
+            Native WebAPK build generated automatically
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===========================================================================
+     6. DIRECT APP ACCESS (HIGH-VISIBILITY CTA)
+     =========================================================================== -->
+<section style="padding:100px 0;position:relative;overflow:hidden">
+  <div class="container" style="position:relative;z-index:10">
+    <div class="glass-card" style="padding:clamp(40px,7vw,80px) clamp(24px,5vw,60px);text-align:center;position:relative;overflow:hidden;border-color:rgba(210,255,58,0.3);background:radial-gradient(circle at 50% 0%,rgba(210,255,58,0.08) 0%,#070A11 75%)">
+      <!-- Glow element -->
+      <div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:400px;height:120px;background:radial-gradient(ellipse,rgba(210,255,58,0.25),transparent 70%);filter:blur(40px);pointer-events:none"></div>
+
+      <div class="pill-badge" style="margin-bottom:16px">
+        <div class="pill-dot"></div>
+        <span>Ready to begin?</span>
+      </div>
+
+      <h2 style="font-size:clamp(32px,5vw,56px);font-weight:900;letter-spacing:-0.04em;line-height:1.05;margin-bottom:18px">
+        Your next deep flow session<br>
+        <span class="text-lime">is one click away.</span>
+      </h2>
+
+      <p style="font-size:clamp(15px,2vw,18px);line-height:1.65;color:rgba(255,255,255,0.6);max-width:600px;margin:0 auto 36px">
+        Lock in your study blocks, calibrate your mental state, and turn attention into your strongest competitive advantage.
+      </p>
+
+      <div style="display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap">
+        <!-- Direct App Link -->
+        <a href="https://focusdotflow.vercel.app" target="_blank" rel="noopener" class="btn-primary" style="padding:16px 36px;font-size:16px">
+          <span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 1">bolt</span>
+          <span>Open FocusDot Live App</span>
+        </a>
+        <a href="#video" class="btn-secondary" style="padding:16px 28px;font-size:16px">
+          <span class="material-symbols-outlined" style="font-size:20px">play_arrow</span>
+          <span>Watch Showcase Again</span>
+        </a>
+      </div>
+
+      <div style="margin-top:28px;font-size:12.5px;color:rgba(255,255,255,0.4)">
+        Direct Link: <a href="https://focusdotflow.vercel.app" style="color:#D2FF3A;text-decoration:underline">https://focusdotflow.vercel.app</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===========================================================================
+     7. FOOTER
+     =========================================================================== -->
+<footer style="padding:60px 0 40px;background:#020306;border-top:1px solid rgba(255,255,255,0.07)">
+  <div class="container">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:40px;margin-bottom:48px">
+      <!-- Col 1: Brand -->
+      <div style="max-width:320px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+          <div style="width:36px;height:36px;border-radius:11px;background:rgba(210,255,58,0.1);border:1px solid rgba(210,255,58,0.3);display:flex;align-items:center;justify-content:center;color:#D2FF3A">
+            <span class="material-symbols-outlined" style="font-size:20px;font-variation-settings:'FILL' 1">bolt</span>
+          </div>
+          <div>
+            <div style="font-size:18px;font-weight:900;letter-spacing:-0.03em;color:#fff">FocusDot</div>
+            <div style="font-size:9.5px;text-transform:uppercase;letter-spacing:0.18em;color:rgba(255,255,255,0.4)">Deep Flow Mode</div>
+          </div>
+        </div>
+        <p style="font-size:13.5px;line-height:1.65;color:rgba(255,255,255,0.45)">
+          Focus on what matters. An attention control platform built for students, builders, and deep learners.
+        </p>
+      </div>
+
+      <!-- Col 2: Navigation -->
+      <div>
+        <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#fff;margin-bottom:14px">Product</div>
+        <div style="display:flex;flex-direction:column;gap:10px;font-size:13.5px">
+          <a href="#overview" style="color:rgba(255,255,255,0.5);text-decoration:none;transition:color 0.2s">Overview</a>
+          <a href="#video" style="color:rgba(255,255,255,0.5);text-decoration:none;transition:color 0.2s">Showcase Video</a>
+          <a href="#features" style="color:rgba(255,255,255,0.5);text-decoration:none;transition:color 0.2s">Features</a>
+          <a href="#screenshots" style="color:rgba(255,255,255,0.5);text-decoration:none;transition:color 0.2s">Screenshots</a>
+          <a href="#download" style="color:rgba(255,255,255,0.5);text-decoration:none;transition:color 0.2s">Download PWA</a>
+        </div>
+      </div>
+
+      <!-- Col 3: App Links -->
+      <div>
+        <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#fff;margin-bottom:14px">Live Deployments</div>
+        <div style="display:flex;flex-direction:column;gap:10px;font-size:13.5px">
+          <a href="https://focusdotflow.vercel.app" target="_blank" rel="noopener" style="color:#D2FF3A;text-decoration:none;font-weight:600">Production Web App ↗</a>
+          <a href="/promo/showcase.html" target="_blank" rel="noopener" style="color:rgba(255,255,255,0.5);text-decoration:none">16:9 Showcase Video ↗</a>
+          <a href="/promo/index.html" target="_blank" rel="noopener" style="color:rgba(255,255,255,0.5);text-decoration:none">9:16 Mobile Edition ↗</a>
+          <a href="https://github.com/manash9-ai/FocusDot" target="_blank" rel="noopener" style="color:rgba(255,255,255,0.5);text-decoration:none">GitHub Repository ↗</a>
+        </div>
+      </div>
+
+      <!-- Col 4: Legal & Standards -->
+      <div>
+        <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#fff;margin-bottom:14px">Standards</div>
+        <div style="display:flex;flex-direction:column;gap:10px;font-size:13.5px;color:rgba(255,255,255,0.45)">
+          <span>W3C Progressive Web App</span>
+          <span>WebGL 1.0 / 2.0 Shaders</span>
+          <span>Web Audio API Synthesizer</span>
+          <span>Offline Service Worker V1</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Copyright -->
+    <div style="padding-top:28px;border-top:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;font-size:12px;color:rgba(255,255,255,0.35)">
+      <div>© 2026 FocusDot. All rights reserved. Deep Flow Mode.</div>
+      <div style="display:flex;gap:20px">
+        <a href="https://focusdotflow.vercel.app" style="color:rgba(255,255,255,0.45);text-decoration:none">Live App</a>
+        <a href="#video" style="color:rgba(255,255,255,0.45);text-decoration:none">Showcase</a>
+        <a href="https://github.com/manash9-ai/FocusDot" target="_blank" rel="noopener" style="color:rgba(255,255,255,0.45);text-decoration:none">GitHub</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ===========================================================================
+     PWA INSTALL SCRIPT
+     =========================================================================== -->
+<script>
+  let deferredPrompt = null;
+  const pwaBtn = document.getElementById('pwa-install-btn');
+  const headerBtn = document.getElementById('header-install-btn');
+  const pwaMsg = document.getElementById('pwa-install-msg');
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (headerBtn) headerBtn.style.display = 'inline-flex';
+    if (pwaMsg) pwaMsg.textContent = 'Ready to install directly on this browser!';
+  });
+
+  function triggerPwaInstall() {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          if (pwaMsg) pwaMsg.textContent = '✅ FocusDot was installed successfully!';
+        }
+        deferredPrompt = null;
+      });
+    } else {
+      // Guide user based on device
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      if (isIOS) {
+        alert('To install on iPhone/iPad:\n1. Tap the Share icon (square with arrow)\n2. Tap "Add to Home Screen"');
+      } else {
+        alert('To install FocusDot:\n1. Open menu (⋮ or share icon)\n2. Select "Install FocusDot" or "Add to Home screen"');
+      }
+    }
+  }
+
+  if (pwaBtn) pwaBtn.addEventListener('click', triggerPwaInstall);
+  if (headerBtn) headerBtn.addEventListener('click', triggerPwaInstall);
+</script>
+
+</body>
+</html>

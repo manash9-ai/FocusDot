@@ -41,6 +41,8 @@ const server = http.createServer((req, res) => {
   // If path is a directory, look for index.html inside it
   if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
     filePath = path.join(filePath, 'index.html');
+  } else if (!fs.existsSync(filePath) && fs.existsSync(filePath + '.html')) {
+    filePath = filePath + '.html';
   }
 
   fs.stat(filePath, (err, stats) => {
