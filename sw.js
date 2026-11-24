@@ -1,12 +1,14 @@
 // FocusDot — Progressive Web App Service Worker
-// Version: 1.0.0
+// Version: 1.1.0
 
-const CACHE_NAME = 'focusdot-static-v1';
+const CACHE_NAME = 'focusdot-static-v2';
 const OFFLINE_URL = './offline.html';
 
 const CORE_ASSETS = [
   './',
   './index.html',
+  './app.html',
+  './landing.html',
   './offline.html',
   './manifest.webmanifest',
   './assets/icons/icon-192.png',

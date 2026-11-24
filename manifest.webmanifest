@@ -2,7 +2,7 @@
   "name": "FocusDot",
   "short_name": "FocusDot",
   "description": "Deep Flow Mode — Student Productivity App.",
-  "start_url": "./index.html",
+  "start_url": "./app.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",

@@ -38,8 +38,10 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // If path is a directory, look for index.html inside it
-  if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
+  // Special route for /app
+  if (reqPath === '/app' || reqPath === '/app/') {
+    filePath = path.join(PUBLIC_DIR, 'app.html');
+  } else if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
     filePath = path.join(filePath, 'index.html');
   } else if (!fs.existsSync(filePath) && fs.existsSync(filePath + '.html')) {
     filePath = filePath + '.html';
