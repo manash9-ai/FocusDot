@@ -315,6 +315,145 @@
         padding: 0 16px
       }
     }
+
+    /* Chromatic Orb Slider */
+    .orb-showcase-wrap {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 360px;
+      margin: 0 auto;
+    }
+
+    .orb-ambient-glow {
+      position: absolute;
+      inset: -24px;
+      border-radius: 60px;
+      background: radial-gradient(circle at 50% 45%, rgba(16, 185, 129, 0.28), transparent 70%);
+      filter: blur(28px);
+      z-index: 0;
+      pointer-events: none;
+      transition: background 0.85s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.6s ease;
+    }
+
+    .orb-device-frame {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 340px;
+      aspect-ratio: 9 / 15.6;
+      background: #080A0F;
+      border: 8px solid #1A1E2B;
+      border-radius: 42px;
+      overflow: hidden;
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.85), 0 0 45px rgba(16, 185, 129, 0.22);
+      transition: box-shadow 0.85s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.85s ease;
+    }
+
+    .orb-slide {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      transform: scale(1.06) translateX(18px);
+      transition: opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1), transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+      pointer-events: none;
+    }
+
+    .orb-slide.active {
+      opacity: 1;
+      transform: scale(1) translateX(0);
+      pointer-events: auto;
+      z-index: 2;
+    }
+
+    .orb-slide.prev {
+      opacity: 0;
+      transform: scale(0.96) translateX(-18px);
+      z-index: 1;
+    }
+
+    .orb-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+      display: block;
+    }
+
+    .orb-slider-controls {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .orb-nav-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: rgba(255, 255, 255, 0.75);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .orb-nav-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: scale(1.08);
+    }
+
+    .orb-dots {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .orb-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.25);
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .orb-dot.active {
+      width: 24px;
+      background: var(--dot-color, #D2FF3A);
+      box-shadow: 0 0 12px var(--dot-color, #D2FF3A);
+    }
+
+    .orb-theme-chip {
+      cursor: pointer;
+      transition: all 0.25s ease;
+      opacity: 0.65;
+    }
+
+    .orb-theme-chip:hover,
+    .orb-theme-chip.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 0 18px var(--chip-glow, rgba(210, 255, 58, 0.3));
+    }
   </style>
 </head>
 
@@ -697,28 +836,53 @@
               <span>+5m Quick Extension and Instant Reset controls</span>
             </div>
           </div>
-          <!-- Orb theme preview chips -->
-          <div style="display:flex;gap:10px;flex-wrap:wrap">
-            <div
-              style="padding:6px 12px;border-radius:999px;background:rgba(210,255,58,0.12);border:1px solid rgba(210,255,58,0.3);font-size:11px;font-weight:700;color:#D2FF3A">
-              Bioluminescent</div>
-            <div
-              style="padding:6px 12px;border-radius:999px;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);font-size:11px;font-weight:700;color:#10B981">
-              Emerald Focus</div>
-            <div
-              style="padding:6px 12px;border-radius:999px;background:rgba(0,245,255,0.12);border:1px solid rgba(0,245,255,0.3);font-size:11px;font-weight:700;color:#00F5FF">
-              Cyber Aurora</div>
-            <div
-              style="padding:6px 12px;border-radius:999px;background:rgba(255,42,85,0.12);border:1px solid rgba(255,42,85,0.3);font-size:11px;font-weight:700;color:#FF2A55">
-              Crimson Flare</div>
-            <div
-              style="padding:6px 12px;border-radius:999px;background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.3);font-size:11px;font-weight:700;color:#A855F7">
-              Cosmic Amethyst</div>
+          <!-- Orb theme preview chips (Interactive Slider Controls) -->
+          <div id="orb-theme-chips" style="display:flex;gap:10px;flex-wrap:wrap">
+            <button type="button" class="orb-theme-chip active" data-orb-index="0"
+              style="--chip-glow:rgba(16,185,129,0.4);padding:6px 12px;border-radius:999px;background:rgba(16,185,129,0.14);border:1px solid rgba(16,185,129,0.45);font-size:11px;font-weight:700;color:#10B981">
+              Bioluminescent Flow</button>
+            <button type="button" class="orb-theme-chip" data-orb-index="1"
+              style="--chip-glow:rgba(0,245,255,0.4);padding:6px 12px;border-radius:999px;background:rgba(0,245,255,0.12);border:1px solid rgba(0,245,255,0.35);font-size:11px;font-weight:700;color:#00F5FF">
+              Cyber Aurora</button>
+            <button type="button" class="orb-theme-chip" data-orb-index="2"
+              style="--chip-glow:rgba(255,42,85,0.4);padding:6px 12px;border-radius:999px;background:rgba(255,42,85,0.12);border:1px solid rgba(255,42,85,0.35);font-size:11px;font-weight:700;color:#FF2A55">
+              Crimson Flare</button>
+            <button type="button" class="orb-theme-chip" data-orb-index="3"
+              style="--chip-glow:rgba(168,85,247,0.4);padding:6px 12px;border-radius:999px;background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.35);font-size:11px;font-weight:700;color:#A855F7">
+              Cosmic Amethyst</button>
           </div>
         </div>
         <div style="flex:1;min-width:300px;display:flex;justify-content:center">
-          <div class="device-mock float-slow">
-            <img src="/assets/screenshots/timer_screen.png" alt="FocusDot Timer Screen Screenshot" loading="lazy">
+          <div class="orb-showcase-wrap" id="orb-showcase-slider">
+            <div class="orb-ambient-glow" id="orb-ambient-glow"></div>
+            <div class="orb-device-frame float-slow" id="orb-device-frame">
+              <div class="orb-slide active" data-index="0">
+                <img src="/assets/screenshots/orb_bioluminescent.jpg" alt="FocusDot Bioluminescent Flow Cosmic Orb" loading="lazy">
+              </div>
+              <div class="orb-slide" data-index="1">
+                <img src="/assets/screenshots/orb_cyber_aurora.jpg" alt="FocusDot Cyber Aurora Cosmic Orb" loading="lazy">
+              </div>
+              <div class="orb-slide" data-index="2">
+                <img src="/assets/screenshots/orb_crimson.jpg" alt="FocusDot Crimson Flare Cosmic Orb" loading="lazy">
+              </div>
+              <div class="orb-slide" data-index="3">
+                <img src="/assets/screenshots/orb_amethyst.jpg" alt="FocusDot Cosmic Amethyst Cosmic Orb" loading="lazy">
+              </div>
+            </div>
+            <div class="orb-slider-controls">
+              <button type="button" class="orb-nav-btn" id="orb-prev-btn" aria-label="Previous theme">
+                <span class="material-symbols-outlined" style="font-size:18px">chevron_left</span>
+              </button>
+              <div class="orb-dots" id="orb-dots">
+                <button type="button" class="orb-dot active" data-orb-index="0" style="--dot-color:#10B981" aria-label="Bioluminescent Flow"></button>
+                <button type="button" class="orb-dot" data-orb-index="1" style="--dot-color:#00F5FF" aria-label="Cyber Aurora"></button>
+                <button type="button" class="orb-dot" data-orb-index="2" style="--dot-color:#FF2A55" aria-label="Crimson Flare"></button>
+                <button type="button" class="orb-dot" data-orb-index="3" style="--dot-color:#A855F7" aria-label="Cosmic Amethyst"></button>
+              </div>
+              <button type="button" class="orb-nav-btn" id="orb-next-btn" aria-label="Next theme">
+                <span class="material-symbols-outlined" style="font-size:18px">chevron_right</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -1122,6 +1286,97 @@
 
     if (pwaBtn) pwaBtn.addEventListener('click', triggerPwaInstall);
     if (headerBtn) headerBtn.addEventListener('click', triggerPwaInstall);
+  </script>
+
+  <!-- ===========================================================================
+     CHROMATIC ORB SLIDER SCRIPT
+     =========================================================================== -->
+  <script>
+    (function () {
+      const sliderWrap = document.getElementById('orb-showcase-slider');
+      const deviceFrame = document.getElementById('orb-device-frame');
+      const ambientGlow = document.getElementById('orb-ambient-glow');
+      const slides = Array.from(document.querySelectorAll('#orb-device-frame .orb-slide'));
+      const dots = Array.from(document.querySelectorAll('#orb-dots .orb-dot'));
+      const chips = Array.from(document.querySelectorAll('#orb-theme-chips .orb-theme-chip'));
+      const prevBtn = document.getElementById('orb-prev-btn');
+      const nextBtn = document.getElementById('orb-next-btn');
+
+      if (!slides.length) return;
+
+      const themePalette = [
+        { glow: 'rgba(16, 185, 129, 0.28)', shadow: 'rgba(16, 185, 129, 0.25)', border: 'rgba(16, 185, 129, 0.35)' },
+        { glow: 'rgba(0, 245, 255, 0.28)', shadow: 'rgba(0, 245, 255, 0.25)', border: 'rgba(0, 245, 255, 0.35)' },
+        { glow: 'rgba(255, 42, 85, 0.30)', shadow: 'rgba(255, 42, 85, 0.26)', border: 'rgba(255, 42, 85, 0.38)' },
+        { glow: 'rgba(168, 85, 247, 0.30)', shadow: 'rgba(168, 85, 247, 0.26)', border: 'rgba(168, 85, 247, 0.38)' }
+      ];
+
+      let currentIndex = 0;
+      let autoTimer = null;
+
+      function setSlide(index) {
+        const nextIdx = (index + slides.length) % slides.length;
+        if (nextIdx === currentIndex && slides[nextIdx].classList.contains('active')) return;
+
+        slides.forEach((s, i) => {
+          s.classList.remove('active', 'prev');
+          if (i === currentIndex && i !== nextIdx) s.classList.add('prev');
+          if (i === nextIdx) s.classList.add('active');
+        });
+
+        dots.forEach((d, i) => d.classList.toggle('active', i === nextIdx));
+        chips.forEach((c, i) => c.classList.toggle('active', i === nextIdx));
+
+        const theme = themePalette[nextIdx];
+        if (ambientGlow) {
+          ambientGlow.style.background = `radial-gradient(circle at 50% 45%, ${theme.glow}, transparent 70%)`;
+        }
+        if (deviceFrame) {
+          deviceFrame.style.boxShadow = `0 25px 70px rgba(0, 0, 0, 0.85), 0 0 48px ${theme.shadow}`;
+          deviceFrame.style.borderColor = theme.border;
+        }
+
+        currentIndex = nextIdx;
+      }
+
+      function startAuto() {
+        stopAuto();
+        autoTimer = setInterval(() => setSlide(currentIndex + 1), 3200);
+      }
+
+      function stopAuto() {
+        if (autoTimer) {
+          clearInterval(autoTimer);
+          autoTimer = null;
+        }
+      }
+
+      if (prevBtn) prevBtn.addEventListener('click', () => { setSlide(currentIndex - 1); startAuto(); });
+      if (nextBtn) nextBtn.addEventListener('click', () => { setSlide(currentIndex + 1); startAuto(); });
+
+      dots.forEach(dot => {
+        dot.addEventListener('click', () => {
+          setSlide(Number(dot.dataset.orbIndex));
+          startAuto();
+        });
+      });
+
+      chips.forEach(chip => {
+        chip.addEventListener('click', () => {
+          setSlide(Number(chip.dataset.orbIndex));
+          startAuto();
+        });
+      });
+
+      if (sliderWrap) {
+        sliderWrap.addEventListener('mouseenter', stopAuto);
+        sliderWrap.addEventListener('mouseleave', startAuto);
+      }
+
+      // Initialize first theme glow & start auto-play
+      setSlide(0);
+      startAuto();
+    })();
   </script>
 
 </body>
